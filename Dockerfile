@@ -8,7 +8,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python packages
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip &&  \
+    pip install --no-cache-dir -r requirements.txt
 
 # Expose port for Jupyter Notebook
 EXPOSE 8888
