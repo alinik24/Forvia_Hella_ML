@@ -2,7 +2,7 @@
 #FROM python:3.10-slim
 
 # Use CUDA-enabled base image with Python (Ubuntu 22.04 recommended)
-FROM nvidia/cuda:12.3.0-cudnn9-devel-ubuntu22.04
+FROM nvidia/cuda:12.3.2-cudnn9-devel-ubuntu22.04
 
 # Avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
