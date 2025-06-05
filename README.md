@@ -8,8 +8,8 @@ For Windows:
 2. Download and Install **WSL** (Windows 11 recommmended for WSL2, Hyper-V should not be used with Windows 11, https://learn.microsoft.com/en-us/windows/wsl/install)
 3. Install **Ubuntu** in the Linux Subsystem if it is not installed per default (**Any other distribution can be used, but is not tested!** )
 4. Set up Docker Desktop
-5. Go to the Docker Engine settings and heck if WSL and the installed Linux Distro (Ubuntu in this case) is used by Docker when running the engine
-   1. If not used check the Distro you want to use and restart the engine
+5. Go to the Docker Engine settings and check if WSL and the installed Linux Distro (Ubuntu in this case) is used by Docker when running the engine
+   1. If not used, check the Distro you want to use and restart the engine
 6. Continue with the Docker Manual
 
 
