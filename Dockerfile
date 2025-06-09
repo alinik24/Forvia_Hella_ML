@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     git curl wget sudo nano \
     && ln -s /usr/bin/python3.10 /usr/bin/python \
     && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
