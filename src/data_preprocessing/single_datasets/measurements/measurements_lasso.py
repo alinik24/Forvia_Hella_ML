@@ -16,13 +16,23 @@ def main():
     print(f"Best alpha: {lasso_model.alpha_}")
     print(f"Selected features: {(lasso_model.coef_ != 0).sum()} / {len(X.columns)}")
 
-    visualize_lasso_coefficients(lasso_model, X.columns)
-    visualize_all_lasso_coefs(lasso_model, X.columns)
-    coef_distribution(lasso_model)
-    plot_lasso_path(X, y)
-    feature_importance_summary(lasso_model, X.columns)
+    print("Plotting cross-validation MSE curve...")
+    plot_cv_mse(lasso_model)
 
-    save_selected_features(lasso_model, X.columns, filename="measurements_selected_features.csv")
+    print("Plotting top features by absolute coefficient magnitude...")
+    plot_feature_importance(lasso_model, X.columns)
+
+    print("Plotting coefficient path...")
+    plot_lasso_path(X, y)
+
+    print("Plotting coefficient values including zeros...")
+    plot_coefficients(lasso_model, X.columns)
+
+    print("Plotting distribution of non-zero coefficients...")
+    plot_nonzero_coef_distribution(lasso_model)
+
+    print("Plotting all non-zero coefficients sorted by magnitude...")
+    plot_all_nonzero_coefs_sorted(lasso_model, X.columns)
 
 
 if __name__ == "__main__":
