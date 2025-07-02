@@ -30,12 +30,12 @@ Parameters:
 - `label_stations`: List of known label-producing stations (excluded from output).
 - `start_date`, `end_date`: Hardcoded time filter window (must be within dataset’s bounds).
 - `batch_size`: Controls how many rows are read per batch from the Parquet file (adjustable based on memory).
-- `created_at`: Assumed timestamp column used for temporal filtering.
+- `created_at`: Assumed timestamp column used for temporal single_datasets.
 
 Usage Notes:
 ------------
 - Reuses cached filtered Parquet file if it already exists.
-- Includes ETA estimates while scanning and filtering.
+- Includes ETA estimates while scanning and single_datasets.
 - Designed for SMT/production telemetry datasets with millions of records.
 
 Output Files:
@@ -62,7 +62,7 @@ non_label_summary_csv = os.path.join(output_dir, 'non_label_stations_summary.csv
 final_summary_csv = os.path.join(output_dir, 'final_processing_summary.csv')
 os.makedirs(output_dir, exist_ok=True)
 
-# Define label stations (used only for filtering)
+# Define label stations (used only for single_datasets)
 label_stations = [
     'b17ad0f9', '5a3f0928', '031c4441', '14473147', 'eef8a574',
     '9a991014', '0bde46ac', '4b1b68dd', '507926e9', 'c06ba294',
