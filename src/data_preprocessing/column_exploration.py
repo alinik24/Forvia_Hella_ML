@@ -4,8 +4,9 @@ import os
 DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
 FILES = {
     "bookings": os.path.join(DATA_DIR, "data_hella_single_line", "bookings_single_line.parquet"),
-    "materials": os.path.join(DATA_DIR, "data_hella_single_line", "materials_single_line.parquet"),
-    "measurements": os.path.join(DATA_DIR, "data_hella_single_line", "measurements_single_line.parquet")
+    "materials": os.path.join(DATA_DIR, "materials", "materials_4_weeks.parquet"),
+    "measurements": os.path.join(DATA_DIR, "data_hella_single_line", "measurements_single_line.parquet"),
+    "bookmeas": os.path.join(DATA_DIR, "bookmeas", "1_week.parquet")
 }
 
 def inspect_parquet_with_dask(file_path, sample_size=5):
@@ -30,3 +31,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
