@@ -1,7 +1,7 @@
 # ---- Preprocessing of bookings dataset ----
 import os
 
-from src.data_preprocessing.single_datasets.utils.preprocessing_utils import load_parquet_dataset, preprocess_data
+from src.data_preprocessing.utils.preprocessing_utils import load_parquet_dataset, preprocess_data
 
 DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
 INPUT_FILE = os.path.join(DATA_DIR, "data_hella_single_line", "bookings_single_line.parquet")

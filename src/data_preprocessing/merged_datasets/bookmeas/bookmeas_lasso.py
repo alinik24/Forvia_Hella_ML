@@ -1,14 +1,15 @@
 from src.data_preprocessing.utils.lasso_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
-DATA_PATH = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data\materials_1_week_encoded.parquet"
+DATA_PATH = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data\bookmeas_1_week_encoded.parquet"
 
 
 def main():
-    print("Loading materials dataset...")
+    print("Loading bookmeas dataset...")
     df = pd.read_parquet(DATA_PATH)
 
     X = df.drop(columns=['target'])
+    X = X.drop(columns=['has_failures'])
     y = df['target']
 
     print("Reporting missing values...")
@@ -16,7 +17,8 @@ def main():
     print("Cleaning up missing values...")
     X = X.dropna(axis=1, how='any')
 
-    print("Running Lasso regression on materials dataset...")
+
+    print("Running Lasso regression on bookmeas dataset...")
     lasso_model = run_lasso(X, y)
 
     print(f"Best alpha: {lasso_model.alpha_}")

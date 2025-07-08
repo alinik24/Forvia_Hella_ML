@@ -5,7 +5,7 @@ import os
 import pyarrow.parquet as pq
 from src.data_preprocessing.single_datasets.config import base_path, output_dir
 
-from src.data_preprocessing.single_datasets.utils.utils import filter_parquet_columns
+from src.data_preprocessing.utils.utils import filter_parquet_columns
 
 
 def main():

@@ -8,8 +8,8 @@ from sklearn.linear_model import LassoCV, lasso_path
 from sklearn.metrics import mean_squared_error
 
 
-def run_lasso(X, y, alphas=100, n_jobs=1, cv=5, random_state=42):
-    lasso = LassoCV(cv=cv, random_state=random_state, alphas=alphas, n_jobs=n_jobs).fit(X, y)
+def run_lasso(X, y, alphas=100, n_jobs=4, cv=5, max_iter=10000, random_state=42):
+    lasso = LassoCV(cv=cv, random_state=random_state, alphas=alphas, n_jobs=n_jobs, max_iter=max_iter, tol=0.0001).fit(X, y)
     return lasso
 
 

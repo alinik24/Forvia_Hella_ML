@@ -1,11 +1,11 @@
-# ---- Preprocessing of materials dataset ----
+# ---- Preprocessing of bookmeas dataset ----
 import os
 
 from src.data_preprocessing.utils.preprocessing_utils import load_parquet_dataset, preprocess_data
 
 DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
-INPUT_FILE = os.path.join(DATA_DIR, "materials", "materials_1_week.parquet")
-OUTPUT_FILE = os.path.join(DATA_DIR, "materials_1_week_encoded.parquet")
+INPUT_FILE = os.path.join(DATA_DIR, "bookmeas", "bookmeas_1_week.parquet")
+OUTPUT_FILE = os.path.join(DATA_DIR, "bookmeas_1_week_encoded.parquet")
 
 
 def main():
@@ -22,9 +22,9 @@ def main():
         y, feature_names, preprocessed_df = preprocess_data(
             df,
             target_column='book_state',
-            datetime_cols=['setup_started_at', 'created_at', 'lot_packed_at'],
-            boolean_cols=[],
-            vectorizer_path='materials_vectorizer.pkl',
+            datetime_cols=['created_at', 'updated_at', 'book_stamp'],
+            boolean_cols=['has_failures'],
+            vectorizer_path='bookmeas_vectorizer.pkl',
             max_unique_snids=3000
         )
         print(f"Preprocessed data shape: {preprocessed_df.shape}")

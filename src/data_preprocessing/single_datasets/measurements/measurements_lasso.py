@@ -1,4 +1,4 @@
-from src.data_preprocessing.single_datasets.utils.lasso_utils import *
+from src.data_preprocessing.utils.lasso_utils import *
 
 DATA_PATH = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data\measurements_encoded_data.parquet"
 
