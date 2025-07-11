@@ -1,17 +1,13 @@
 # ---- Preprocessing of bookmeas dataset ----
-import os
 
+from src.data_preprocessing.config import INPUT_FILE_BOOKMEAS_1w, OUTPUT_FILE_BOOKMEAS_1w_enc
 from src.data_preprocessing.utils.preprocessing_utils import load_parquet_dataset, preprocess_data
-
-DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
-INPUT_FILE = os.path.join(DATA_DIR, "bookmeas", "bookmeas_1_week.parquet")
-OUTPUT_FILE = os.path.join(DATA_DIR, "bookmeas_1_week_encoded.parquet")
 
 
 def main():
     print("Loading data...")
     try:
-        df = load_parquet_dataset(INPUT_FILE)
+        df = load_parquet_dataset(INPUT_FILE_BOOKMEAS_1w)
         print(f"Loaded data with shape: {df.shape}")
     except Exception as e:
         print(f"Error loading data: {e}")
@@ -42,8 +38,8 @@ def main():
         preprocessed_df['target'] = y.values
 
         # Handle large DataFrames with PyArrow
-        preprocessed_df.to_parquet(OUTPUT_FILE, index=False, engine='pyarrow')
-        print(f"Successfully saved preprocessed data to {OUTPUT_FILE}")
+        preprocessed_df.to_parquet(OUTPUT_FILE_BOOKMEAS_1w_enc, index=False, engine='pyarrow')
+        print(f"Successfully saved preprocessed data to {OUTPUT_FILE_BOOKMEAS_1w_enc}")
 
         # Additional validation
         print(f"Saved data info: {preprocessed_df.shape[0]} rows, {preprocessed_df.shape[1]} columns")
@@ -53,8 +49,8 @@ def main():
         # Fallback to CSV if Parquet fails
         try:
             print("Attempting CSV fallback...")
-            preprocessed_df.to_csv(OUTPUT_FILE.replace('.parquet', '.csv'), index=False)
-            print(f"Saved as CSV: {OUTPUT_FILE.replace('.parquet', '.csv')}")
+            preprocessed_df.to_csv(OUTPUT_FILE_BOOKMEAS_1w_enc.replace('.parquet', '.csv'), index=False)
+            print(f"Saved as CSV: {OUTPUT_FILE_BOOKMEAS_1w_enc.replace('.parquet', '.csv')}")
         except Exception as fallback_e:
             print(f"CSV fallback failed: {fallback_e}")
 

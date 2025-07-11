@@ -1,11 +1,11 @@
-from src.data_preprocessing.config import INPUT_FILE_BOOKMEAS_1w_enc
+from src.data_preprocessing.config import FINAL_FILE_BOOKMEASMAT_2w_enc
 from src.data_preprocessing.utils.lasso_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 
 def main():
     print("Loading bookmeas dataset...")
-    df = pd.read_parquet(INPUT_FILE_BOOKMEAS_1w_enc)
+    df = pd.read_parquet(FINAL_FILE_BOOKMEASMAT_2w_enc)
 
     X = df.drop(columns=['target'])
     X = X.drop(columns=['has_failures'])

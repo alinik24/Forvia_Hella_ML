@@ -1,13 +1,14 @@
 import dask.dataframe as dd
 import os
+from src.data_preprocessing.config import INPUT_FILE_BOOKINGS_SL, INPUT_FILE_MATERIALS_2w, INPUT_FILE_MEAS_SL, INPUT_FILE_MATERIALS_1w_enc, INPUT_FILE_BOOKMEAS_2w, FINAL_FILE_BOOKMEASMAT_2w
 
-DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
 FILES = {
-    #"bookings": os.path.join(DATA_DIR, "data_hella_single_line", "bookings_single_line.parquet"),
-    "materials": os.path.join(DATA_DIR, "materials", "materials_1_week.parquet"),
-    #"materialsenc": os.path.join(DATA_DIR, "materials_1_week_encoded.parquet"),
-    #"measurements": os.path.join(DATA_DIR, "data_hella_single_line", "measurements_single_line.parquet"),
-    #"bookmeas": os.path.join(DATA_DIR, "bookmeas", "1_week.parquet")
+    "bookings": INPUT_FILE_BOOKINGS_SL,
+    "materials": INPUT_FILE_MATERIALS_2w,
+    #"materialsenc": INPUT_FILE_MATERIALS_1w_enc,
+    "measurements": INPUT_FILE_MEAS_SL,
+    #"bookmeas": INPUT_FILE_BOOKMEAS_2w,
+    #"bookmeasmat": FINAL_FILE_BOOKMEASMAT_2w,
 }
 
 def inspect_parquet_with_dask(file_path, sample_size=5):

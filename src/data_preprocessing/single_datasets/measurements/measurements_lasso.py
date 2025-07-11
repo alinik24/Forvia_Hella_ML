@@ -1,14 +1,19 @@
+from src.data_preprocessing.config import INPUT_FILE_MEAS_SL_enc
 from src.data_preprocessing.utils.lasso_utils import *
-
-DATA_PATH = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data\measurements_encoded_data.parquet"
+from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 
 def main():
     print("Loading measurements dataset...")
-    df = pd.read_parquet(DATA_PATH)
+    df = pd.read_parquet(INPUT_FILE_MEAS_SL_enc)
 
     X = df.drop(columns=['target'])
     y = df['target']
+
+    print("Reporting missing values...")
+    print_nan_columns_info(X)
+    print("Cleaning up missing values...")
+    X = X.dropna(axis=1, how='any')
 
     print("Running Lasso regression on measurements dataset...")
     lasso_model = run_lasso(X, y)

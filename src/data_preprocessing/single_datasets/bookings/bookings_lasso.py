@@ -1,13 +1,13 @@
+from src.data_preprocessing.config import INPUT_FILE_BOOKINGS_SL_enc
 from src.data_preprocessing.utils.lasso_utils import *
-
-DATA_PATH = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data\bookings_encoded_data.parquet"
 
 
 def main():
     print("Loading bookings dataset...")
-    df = pd.read_parquet(DATA_PATH)
+    df = pd.read_parquet(INPUT_FILE_BOOKINGS_SL_enc)
 
     X = df.drop(columns=['target'])
+    X = X.drop(columns=['has_failures'])
     y = df['target']
 
     print("Running Lasso regression on bookings dataset...")

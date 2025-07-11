@@ -1,20 +1,14 @@
 # filter_materials.py
 
-import os
-
 import pyarrow.parquet as pq
 
-from src.data_preprocessing.single_datasets.config import base_path, output_dir
-from src.data_preprocessing.utils.utils import filter_parquet_columns
+from src.data_preprocessing.config import INPUT_FILE_MATERIALS_1w_enc, INPUT_FILE_MATERIALS_1w_enc_f
 from src.data_preprocessing.utils.preprocessing_utils import load_parquet_dataset
-
-DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
-INPUT_FILE = os.path.join(DATA_DIR, "materials_1_week_encoded.parquet")
-OUTPUT_FILE = os.path.join(DATA_DIR, "materials_1_week_encoded.parquet")
+from src.data_preprocessing.utils.utils import filter_parquet_columns
 
 
 def main():
-    df = load_parquet_dataset(INPUT_FILE)
+    df = load_parquet_dataset(INPUT_FILE_MATERIALS_1w_enc)
 
     # TODO according to lasso
     keep_columns = [
@@ -23,7 +17,7 @@ def main():
         "container_number", "panel_position", "created_at", "book_state"
     ]
 
-    filter_parquet_columns(INPUT_FILE, OUTPUT_FILE, keep_columns)
+    filter_parquet_columns(INPUT_FILE_MATERIALS_1w_enc, INPUT_FILE_MATERIALS_1w_enc_f, keep_columns)
 
 
 if __name__ == '__main__':

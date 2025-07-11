@@ -4,13 +4,13 @@ import os
 
 import pyarrow.parquet as pq
 
-from src.data_preprocessing.single_datasets.config import base_path, output_dir
+from src.data_preprocessing.config import BASE_PATH_SL, OUTPUT_DIR_FILTERED_SL
 from src.data_preprocessing.utils.utils import filter_parquet_columns
 
 
 def main():
-    bookings_file = os.path.join(base_path, "bookings_single_line.parquet")
-    filtered_output_file = os.path.join(output_dir, "filtered_bookings.parquet")
+    bookings_file = os.path.join(BASE_PATH_SL, "bookings_single_line.parquet")
+    filtered_output_file = os.path.join(OUTPUT_DIR_FILTERED_SL, "filtered_bookings.parquet")
 
     # TODO according to lasso
     keep_columns = [

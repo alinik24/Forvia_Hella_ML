@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LassoCV, lasso_path
 from sklearn.metrics import mean_squared_error
+import textwrap
 
 
 def run_lasso(X, y, alphas=100, n_jobs=4, cv=5, max_iter=10000, random_state=42):
@@ -61,14 +62,19 @@ def plot_lasso_path(X, y):
 
 
 def plot_coefficients(lasso_model, feature_names):
-    """Plot coefficients including zeros to see shrunk features"""
     coefs = pd.Series(lasso_model.coef_, index=feature_names).sort_values(key=abs, ascending=True)
 
-    plt.figure(figsize=(12, 8))
+    # Wrap long feature names
+    wrapped_labels = ['\n'.join(textwrap.wrap(label, 30)) for label in coefs.index]
+    coefs.index = wrapped_labels
+
+    # Plot
+    plt.figure(figsize=(12, len(coefs) * 0.25))  # Adjust height based on number of features
     coefs.plot(kind='barh', color=coefs.apply(lambda x: 'red' if x != 0 else 'gray'))
     plt.title('Lasso Coefficients (Zero and Non-zero)')
     plt.xlabel('Coefficient Value')
     plt.ylabel('Feature')
+    plt.tick_params(axis='y', labelsize=8)
     plt.tight_layout()
     plt.show()
 

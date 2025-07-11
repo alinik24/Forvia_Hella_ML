@@ -1,13 +1,10 @@
-# ---- Preprocessing of materials dataset ----
-
-from src.data_preprocessing.config import INPUT_FILE_MATERIALS_1w, OUTPUT_FILE_MATERIALS_1w_enc, VECTORIZER_PATH_MATERIALS
+from src.data_preprocessing.config import FINAL_FILE_BOOKMEASMAT_2w, FINAL_FILE_BOOKMEASMAT_2w_enc
 from src.data_preprocessing.utils.preprocessing_utils import load_parquet_dataset, preprocess_data
-
 
 def main():
     print("Loading data...")
     try:
-        df = load_parquet_dataset(INPUT_FILE_MATERIALS_1w)
+        df = load_parquet_dataset(FINAL_FILE_BOOKMEASMAT_2w)
         print(f"Loaded data with shape: {df.shape}")
     except Exception as e:
         print(f"Error loading data: {e}")
@@ -18,9 +15,9 @@ def main():
         y, feature_names, preprocessed_df = preprocess_data(
             df,
             target_column='book_state',
-            datetime_cols=['setup_started_at', 'created_at', 'lot_packed_at'],
-            boolean_cols=[],
-            vectorizer_path=VECTORIZER_PATH_MATERIALS,
+            datetime_cols=['created_at', 'updated_at', 'book_stamp'],
+            boolean_cols=['has_failures'],
+            vectorizer_path='bookmeas_vectorizer.pkl',
             max_unique_snids=3000
         )
         print(f"Preprocessed data shape: {preprocessed_df.shape}")
@@ -38,8 +35,8 @@ def main():
         preprocessed_df['target'] = y.values
 
         # Handle large DataFrames with PyArrow
-        preprocessed_df.to_parquet(OUTPUT_FILE_MATERIALS_1w_enc, index=False, engine='pyarrow')
-        print(f"Successfully saved preprocessed data to {OUTPUT_FILE_MATERIALS_1w_enc}")
+        preprocessed_df.to_parquet(FINAL_FILE_BOOKMEASMAT_2w_enc, index=False, engine='pyarrow')
+        print(f"Successfully saved preprocessed data to {FINAL_FILE_BOOKMEASMAT_2w_enc}")
 
         # Additional validation
         print(f"Saved data info: {preprocessed_df.shape[0]} rows, {preprocessed_df.shape[1]} columns")
@@ -49,8 +46,8 @@ def main():
         # Fallback to CSV if Parquet fails
         try:
             print("Attempting CSV fallback...")
-            preprocessed_df.to_csv(OUTPUT_FILE_MATERIALS_1w_enc.replace('.parquet', '.csv'), index=False)
-            print(f"Saved as CSV: {OUTPUT_FILE_MATERIALS_1w_enc.replace('.parquet', '.csv')}")
+            preprocessed_df.to_csv(FINAL_FILE_BOOKMEASMAT_2w_enc.replace('.parquet', '.csv'), index=False)
+            print(f"Saved as CSV: {FINAL_FILE_BOOKMEASMAT_2w_enc.replace('.parquet', '.csv')}")
         except Exception as fallback_e:
             print(f"CSV fallback failed: {fallback_e}")
 
