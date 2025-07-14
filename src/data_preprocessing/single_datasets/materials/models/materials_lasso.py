@@ -1,12 +1,12 @@
 from src.data_preprocessing.utils.lasso_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
-from src.data_preprocessing.config import INPUT_FILE_MATERIALS_1w_enc
+from src.data_preprocessing.config import INPUT_FILE_MATERIALS_2w_enc
 
 
 def main():
     print("Loading materials dataset...")
-    df = pd.read_parquet(INPUT_FILE_MATERIALS_1w_enc)
+    df = pd.read_parquet(INPUT_FILE_MATERIALS_2w_enc)
 
     X = df.drop(columns=['target'])
     y = df['target']

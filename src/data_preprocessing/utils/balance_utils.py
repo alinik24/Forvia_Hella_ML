@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import Tuple, List, Set, Dict
+from typing import Tuple, Set, Dict
 
 import numpy as np
 import pyarrow as pa
@@ -9,183 +9,107 @@ import pyarrow.dataset as ds
 import pyarrow.parquet as pq
 
 
-def load_serials_from_dataset(path: str, serial_col: str) -> Set:
-    """Load all unique serial numbers from a dataset with error handling."""
-    try:
-        dataset = ds.dataset(path, format="parquet")
-        table = dataset.to_table(columns=[serial_col])
-        serials_list = []
-        for chunk in table[serial_col].chunks:
-            serials_list.extend(chunk.to_pylist())
-        return set(serials_list)
-    except (pa.ArrowInvalid, pa.ArrowIOError, OSError) as e:
-        print(f"!ERROR loading serials from {path}: {str(e)}!")
-        raise
-    except Exception as e:
-        print(f"!UNEXPECTED ERROR loading serials from {path}:!")
-        traceback.print_exc()
-        raise
-
-
-def collect_critical_and_common_serials(
-        bookmeas_path: str,
-        materials_serials: Set,
-        serial_col: str,
-        bookstate_col: str
-) -> Tuple[Set, List[pa.Array], Dict[int, int]]:
+def extract_serials_by_state(
+    dataset_path: str,
+    serial_col: str,
+    state_col: str,
+    allowed_serials: Set
+) -> Tuple[Dict[int, Set], Dict[int, int]]:
     """
-    Collect serials with bookstate 1/2 (critical), all common serials,
-    and bookstate distribution with error handling.
+    Extracts serials grouped by class label (e.g., book_state), filtered to only serials in `allowed_serials`.
+    Returns a dictionary {state: set of serials} and a count dictionary.
     """
-    critical_serials = set()
-    all_common_serials = []
-    bookstate_counts = {0: 0, 1: 0, 2: 0}
+    state_to_serials = {0: set(), 1: set(), 2: set()}
+    state_counts = {0: 0, 1: 0, 2: 0}
 
     try:
-        bookmeas_ds = ds.dataset(bookmeas_path, format="parquet")
-        materials_array = pa.array(list(materials_serials))
+        dataset = ds.dataset(dataset_path, format="parquet")
+        allowed_array = pa.array(list(allowed_serials))
 
-        for batch in bookmeas_ds.to_batches(columns=[serial_col, bookstate_col]):
+        for batch in dataset.to_batches(columns=[serial_col, state_col]):
             try:
-                # Create mask for common serials
-                mask = pc.is_in(batch[serial_col], materials_array)
+                mask = pc.is_in(batch[serial_col], allowed_array)
                 filtered = batch.filter(mask)
-
-                # Skip empty batches after filtering
                 if filtered.num_rows == 0:
                     continue
 
-                for bookstate in [1, 2]:
-                    state_mask = pc.equal(filtered[bookstate_col], bookstate)
-                    critical = filtered[serial_col].filter(state_mask)
-                    # Convert to Python list safely
-                    critical_list = critical.to_pylist()
-                    critical_serials.update(critical_list)
-                    bookstate_counts[bookstate] += len(critical_list)
+                for state in [0, 1, 2]:
+                    state_mask = pc.equal(filtered[state_col], state)
+                    serials = filtered[serial_col].filter(state_mask)
+                    serial_list = serials.to_pylist()
+                    state_to_serials[state].update(serial_list)
+                    state_counts[state] += len(serial_list)
 
-                # Count zeros using Arrow compute
-                zero_mask = pc.equal(filtered[bookstate_col], 0)
-                bookstate_counts[0] += pc.sum(zero_mask).as_py()
-
-                # Collect common serials
-                all_common_serials.append(filtered[serial_col])
-
-            except (pa.ArrowInvalid, pa.ArrowTypeError, ValueError) as e:
-                print(f"!BATCH PROCESSING ERROR: {str(e)}!")
-                print("Skipping problematic batch")
-            except MemoryError:
-                print("!MEMORY ERROR IN BATCH PROCESSING!")
-                print("Consider reducing batch size or increasing memory")
-                raise
-            except Exception:
-                print("!UNEXPECTED BATCH ERROR:!")
+            except Exception as e:
+                print(f"!Error during batch processing: {e}")
                 traceback.print_exc()
 
-        return critical_serials, all_common_serials, bookstate_counts
-
-    except (pa.ArrowInvalid, pa.ArrowIOError, OSError) as e:
-        print(f"!ERROR processing bookmeas dataset: {str(e)}!")
+    except Exception as e:
+        print(f"!Failed to read dataset at {dataset_path}: {e}")
+        traceback.print_exc()
         raise
-    except Exception:
-        print("!UNEXPECTED ERROR in serial collection:!")
+
+    return state_to_serials, state_counts
+
+
+def load_serials(path: str, serial_col: str) -> Set:
+    """
+    Load all unique serial numbers from a Parquet dataset column.
+    """
+    try:
+        dataset = ds.dataset(path, format="parquet")
+        table = dataset.to_table(columns=[serial_col])
+        serials = []
+        for chunk in table[serial_col].chunks:
+            serials.extend(chunk.to_pylist())
+        return set(serials)
+    except Exception as e:
+        print(f"!Failed to load serials from {path}: {e}")
         traceback.print_exc()
         raise
 
 
-def sample_zero_serials(
-        all_common_serials: List[pa.Array],
-        critical_serials: Set,
-        sample_size: int,
-        random_state: int
+
+def sample_zero_serials_with_diversity(
+    zero_serials: Set,
+    target_size: int,
+    random_state: int = 42
 ) -> Set:
-    """Sample a subset of serials from bookstate=0 entries with error handling."""
+    """
+    Samples a subset of 0-state serials while preserving serial diversity.
+    """
+    if len(zero_serials) <= target_size:
+        return zero_serials
+
+    rng = np.random.default_rng(random_state)
+    sampled = rng.choice(list(zero_serials), size=target_size, replace=False)
+    return set(sampled)
+
+
+def filter_and_write_dataset(
+    input_path: str,
+    output_path: str,
+    serials_to_keep: Set,
+    serial_col: str
+) -> None:
+    """
+    Filters a Parquet dataset to rows where serial_col is in serials_to_keep and writes it out.
+    """
     try:
-        # Handle empty case
-        if not all_common_serials:
-            return set()
-
-        # Concatenate arrays safely
-        all_serials_arr = pa.concat_arrays(all_common_serials)
-
-        # Check for empty arrays
-        if len(all_serials_arr) == 0:
-            return set()
-
-        # Create critical serials array
-        critical_array = pa.array(list(critical_serials))
-
-        # Create mask for non-critical serials
-        in_mask = pc.is_in(all_serials_arr, critical_array)
-        zero_mask = pc.invert(in_mask)
-        zero_serials = all_serials_arr.filter(zero_mask)
-
-        # Handle case with no zero serials
-        if len(zero_serials) == 0:
-            return set()
-
-        # Handle case where sample size is larger than available
-        available_zeros = len(zero_serials)
-        if available_zeros < sample_size:
-            print(f"!Warning: Only {available_zeros} zero-serials available, sampling all!")
-            sample_size = available_zeros
-
-        # Sample indices
-        rng = np.random.default_rng(random_state)
-        if sample_size > 0:
-            sampled_indices = rng.choice(available_zeros, size=sample_size, replace=False)
-            sampled_zero_serials = zero_serials.take(sampled_indices)
-            return set(sampled_zero_serials.to_pylist())
-        return set()
-
-    except (pa.ArrowInvalid, pa.ArrowCapacityError) as e:
-        print(f"!SAMPLING ERROR: {str(e)}!")
-        raise
-    except ValueError as ve:
-        print(f"!VALUE ERROR IN SAMPLING: {str(ve)}!")
-        raise
-    except MemoryError:
-        print("!MEMORY ERROR DURING SAMPLING!")
-        raise
-    except Exception:
-        print("!UNEXPECTED SAMPLING ERROR:")
-        traceback.print_exc()
-        raise
-
-
-def write_filtered_dataset(input_path: str, output_path: str, serials: Set, serial_col: str) -> None:
-    """Write a dataset filtered by a set of serial numbers with error handling."""
-    try:
-        # Create output directory if needed
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-        # Use temporary file for safe writes
         temp_path = output_path + ".tmp"
-        serial_array = pa.array(list(serials))
+        serial_array = pa.array(list(serials_to_keep))
 
         dataset = ds.dataset(input_path, format="parquet")
-        filtered = dataset.to_table(filter=pc.field(serial_col).isin(serial_array))
+        filtered_table = dataset.to_table(filter=pc.field(serial_col).isin(serial_array))
 
-        pq.write_table(filtered, temp_path)
+        pq.write_table(filtered_table, temp_path)
         os.replace(temp_path, output_path)
-
-    except (pa.ArrowIOError, OSError) as e:
-        print(f"!I/O ERROR writing {output_path}: {str(e)}!")
-        # Clean up temporary file if exists
-        if os.path.exists(temp_path):
-            try:
-                os.remove(temp_path)
-            except:
-                pass
-        raise
-    except pa.ArrowInvalid as e:
-        print(f"!ARROW ERROR writing {output_path}: {str(e)}!")
-        raise
-    except Exception:
-        print(f"!UNEXPECTED ERROR writing {output_path}:")
+    except Exception as e:
+        print(f"!Error writing filtered dataset: {e}")
         traceback.print_exc()
         raise
     finally:
-        # Ensure temp file is cleaned up
         if os.path.exists(temp_path):
             try:
                 os.remove(temp_path)
@@ -193,62 +117,66 @@ def write_filtered_dataset(input_path: str, output_path: str, serials: Set, seri
                 pass
 
 
-def balance_datasets(
-        input_materials_path: str,
-        input_bookmeas_path: str,
-        output_materials_path: str,
-        output_bookmeas_path: str,
-        serial_col: str = "serial_number_id",
-        bookstate_col: str = "book_state",
-        factor: int = 5,
-        random_state: int = 42
+def balance_by_state_per_serial(
+    input_main_path: str,
+    output_main_path: str,
+    serial_col: str = "serial_number_id",
+    bookstate_col: str = "book_state",
+    zero_to_nonzero_ratio: int = 5,
+    random_state: int = 42
 ) -> None:
     """
-    Balance bookmeas and materials datasets with comprehensive error handling.
-    Preserves original logic while adding memory safety and error recovery.
+    Balances a large dataset by downsampling 0-class entries while retaining all 1 and 2 entries.
+    Ensures serial diversity by not keeping only one serial.
     """
     try:
-        # Validate input paths
-        for path in [input_materials_path, input_bookmeas_path]:
-            if not os.path.exists(path):
-                raise FileNotFoundError(f"Input file not found: {path}")
+        print("Scanning input dataset...")
+        dataset = ds.dataset(input_main_path, format="parquet")
+        nonzero_serials: Set[str] = set()
+        zero_serials_counts: Dict[str, int] = {}
+        state_map: Dict[str, Set[int]] = {}
 
-        print("Reading material serials...")
-        materials_serials = load_serials_from_dataset(input_materials_path, serial_col)
-        print(f"Found {len(materials_serials)} material serials")
+        # First pass: identify serials and bookstates
+        for batch in dataset.to_batches(columns=[serial_col, bookstate_col]):
+            serials = batch[serial_col]
+            states = batch[bookstate_col]
+            for s, b in zip(serials.to_pylist(), states.to_pylist()):
+                if s not in state_map:
+                    state_map[s] = set()
+                state_map[s].add(b)
 
-        print("Scanning bookmeas to collect serials...")
-        critical_serials, all_common_serials, bookstate_counts = collect_critical_and_common_serials(
-            input_bookmeas_path, materials_serials, serial_col, bookstate_col
-        )
-        print(f"Found {len(critical_serials)} critical serials, {bookstate_counts[0]} zero entries")
+        # Split serials into non-zero vs only-zero
+        for serial, states in state_map.items():
+            if 1 in states or 2 in states:
+                nonzero_serials.add(serial)
+            elif states == {0}:
+                zero_serials_counts[serial] = zero_serials_counts.get(serial, 0) + 1
 
-        n_non_zero = len(critical_serials)
-        n_zero = min(bookstate_counts[0], n_non_zero * factor) if n_non_zero > 0 else 0
-        print(f"Balancing dataset: {n_non_zero} non-zero entries, sampling {n_zero} zeros")
+        print(f"Found {len(nonzero_serials)} non-zero serials")
+        print(f"Found {len(zero_serials_counts)} zero-only serials")
 
-        print("Sampling zero entries...")
-        sampled_zero_serials = sample_zero_serials(
-            all_common_serials, critical_serials, n_zero, random_state
-        ) if n_zero > 0 else set()
+        # Sample from zero-only serials
+        n_sample = min(len(zero_serials_counts), len(nonzero_serials) * zero_to_nonzero_ratio)
+        sampled_zero_serials = set()
+        if n_sample > 0:
+            rng = np.random.default_rng(random_state)
+            sampled_zero_serials = set(rng.choice(list(zero_serials_counts.keys()), size=n_sample, replace=False))
+            print(f"Sampled {len(sampled_zero_serials)} zero-only serials")
 
-        final_serials = critical_serials | sampled_zero_serials
-        print(f"Total serials after balancing: {len(final_serials)}")
+        # Final serial list to keep
+        serials_to_keep = nonzero_serials | sampled_zero_serials
+        print(f"Total serials to retain: {len(serials_to_keep)}")
 
-        print("Writing filtered materials...")
-        write_filtered_dataset(input_materials_path, output_materials_path, final_serials, serial_col)
+        # Filter and write dataset
+        print("Filtering dataset...")
+        serials_array = pa.array(list(serials_to_keep))
+        filtered_table = dataset.to_table(filter=pc.field(serial_col).isin(serials_array))
 
-        print("Writing filtered bookmeas...")
-        write_filtered_dataset(input_bookmeas_path, output_bookmeas_path, final_serials, serial_col)
+        print("Writing output dataset...")
+        os.makedirs(os.path.dirname(output_main_path), exist_ok=True)
+        pq.write_table(filtered_table, output_main_path)
+        print("Done. Balanced dataset saved.")
 
-        print("Balanced datasets written successfully.")
-
-    except FileNotFoundError as fnfe:
-        print(f"!CRITICAL ERROR: {str(fnfe)}!")
-    except MemoryError:
-        print("!MEMORY ERROR: Processing halted due to insufficient memory!")
-    except (pa.ArrowInvalid, pa.ArrowIOError) as ae:
-        print(f"!ARROW ERROR: {str(ae)}!")
     except Exception as e:
-        print(f"!UNEXPECTED ERROR: {str(e)}!")
+        print(f"!UNEXPECTED ERROR during balancing: {str(e)}")
         traceback.print_exc()

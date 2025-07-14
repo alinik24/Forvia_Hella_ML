@@ -1,7 +1,7 @@
 # config.py
 import os
 
-# Base and output directories for the single line datasets
+# Base directory for all datasets
 #TODO Change to your path
 DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
 
@@ -24,6 +24,7 @@ INPUT_FILE_MATERIALS_1w_enc = os.path.join(DATA_DIR, "materials_1_week_encoded.p
 INPUT_FILE_MATERIALS_1w_enc_f = os.path.join(DATA_DIR, "materials_1_week_filtered.parquet")
 INPUT_FILE_MATERIALS_2w = os.path.join(DATA_DIR, "materials", "materials_2_weeks.parquet")
 INPUT_FILE_MATERIALS_2w_b = os.path.join(DATA_DIR, "materials_2_weeks_balanced.parquet")
+INPUT_FILE_MATERIALS_2w_enc = os.path.join(DATA_DIR, "materials_2_weeks_encoded.parquet")
 INPUT_FILE_MATERIALS_4w = os.path.join(DATA_DIR, "materials", "materials_4_weeks.parquet")
 
 # Measurements single line dataset input files
@@ -32,8 +33,9 @@ INPUT_FILE_MEAS_SL_enc = os.path.join(DATA_DIR, "measurements_encoded.parquet")
 INPUT_FILE_MEAS_SL_enc_f = os.path.join(DATA_DIR, "measurements_filtered.parquet")
 
 # Measurements single line dataset output files
-OUTPUT_FILE_MEAS_SL_enc = os.path.join(DATA_DIR, "measurements_encoded.parquet")
-OUTPUT_FILE_MEAS_SL_enc_f = os.path.join(DATA_DIR, "measurements_filtered.parquet")
+OUTPUT_FILE_MEAS_SL_enc = os.path.join(DATA_DIR, "measurements", "measurements_encoded.parquet")
+OUTPUT_FILE_MEAS_SL_b = os.path.join(DATA_DIR, "measurements", "measurements_balanced.parquet")
+OUTPUT_FILE_MEAS_SL_enc_f = os.path.join(DATA_DIR, "measurements", "measurements_filtered.parquet")
 
 # Materials dataset output files
 OUTPUT_FILE_MATERIALS_1w = os.path.join(DATA_DIR, "materials", "materials_1_week.parquet")
@@ -45,8 +47,9 @@ OUTPUT_FILE_MATERIALS_2w_enc_f = os.path.join(DATA_DIR, "materials_2_weeks_filte
 OUTPUT_FILE_MATERIALS_2w_b = os.path.join(DATA_DIR, "materials_2_weeks_balanced.parquet")
 
 # Bookings single line dataset output files
-OUTPUT_FILE_BOOKINGS_SL_enc = os.path.join(DATA_DIR, "bookings_encoded.parquet")
-OUTPUT_FILE_BOOKINGS_SL_FILTERED = os.path.join(DATA_DIR, "data_hella_single_line", "filtered_bookings.parquet")
+OUTPUT_FILE_BOOKINGS_SL_b = os.path.join(DATA_DIR, "bookings", "bookings_balanced.parquet")
+OUTPUT_FILE_BOOKINGS_SL_enc = os.path.join(DATA_DIR, "bookings", "bookings_encoded.parquet")
+OUTPUT_FILE_BOOKINGS_SL_f = os.path.join(DATA_DIR, "bookings",  "bookings_filtered.parquet")
 
 # Correlation results files
 OUTPUT_BOOKMEAS_FILE_PEARSON = os.path.join(DATA_DIR, "bookmeas_cleaned_pearson.parquet")
@@ -65,6 +68,7 @@ OUTPUT_FILE_BOOKMEAS_2w_b = os.path.join(DATA_DIR, "bookmeas_2_weeks_balanced.pa
 
 # Bookmeasmat dataset output files
 FINAL_FILE_BOOKMEASMAT_2w = os.path.join(DATA_DIR, "final_bookmeasmat_2_weeks.parquet")
+FINAL_FILE_BOOKMEASMAT_2w_b = os.path.join(DATA_DIR, "final_bookmeasmat_2_weeks.parquet")
 FINAL_FILE_BOOKMEASMAT_2w_enc = os.path.join(DATA_DIR, "final_bookmeasmat_2_weeks_encoded.parquet")
 
 # Paths for saving skrubs vectorizers
