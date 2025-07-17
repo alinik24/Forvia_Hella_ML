@@ -1,4 +1,4 @@
-from src.data_preprocessing.utils.lasso_utils import *
+from src.data_preprocessing.utils.log_reg_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 from src.data_preprocessing.config import INPUT_FILE_MATERIALS_2w_enc

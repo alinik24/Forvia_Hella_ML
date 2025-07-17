@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sklearn.linear_model import RidgeCV, ridge_regression
+from sklearn.linear_model import RidgeClassifierCV, ridge_regression
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 
 
-def run_ridge(X, y, alphas=np.logspace(-4, 4, 100), cv=5, scoring='neg_mean_squared_error'):
-    ridge = RidgeCV(alphas=alphas, scoring=scoring, cv=cv).fit(X, y)
+def run_ridge(X, y, alphas=np.logspace(0, 10, 100), cv=3, scoring='neg_mean_squared_error'):
+    ridge = RidgeClassifierCV(alphas=alphas, scoring=scoring, cv=cv, class_weight='balanced').fit(X, y)
     return ridge
 
 

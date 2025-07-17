@@ -7,9 +7,12 @@ DATA_DIR = r"D:\Universität\Master\Semester2\RealWorld_ML_Problems\Data"
 
 # Bookmeas dataset input files
 INPUT_FILE_BOOKMEAS_1w = os.path.join(DATA_DIR, "bookmeas", "bookmeas_1_week.parquet")
+INPUT_FILE_BOOKMEAS_1w_b = os.path.join(DATA_DIR, "bookmeas", "bookmeas_1_week_balanced.parquet")
 INPUT_FILE_BOOKMEAS_1w_enc = os.path.join(DATA_DIR, "bookmeas_1_week_encoded.parquet")
 INPUT_FILE_BOOKMEAS_1w_enc_f = os.path.join(DATA_DIR, "bookmeas_1_week_filtered.parquet")
 INPUT_FILE_BOOKMEAS_2w = os.path.join(DATA_DIR, "bookmeas", "bookmeas_2_weeks.parquet")
+INPUT_FILE_BOOKMEAS_2w_enc = os.path.join(DATA_DIR, "bookmeas", "bookmeas_2_weeks_encoded.parquet")
+INPUT_FILE_BOOKMEAS_2w_enc_unbalanced = os.path.join(DATA_DIR, "bookmeas", "bookmeas_2_weeks_encoded_unbalanced.parquet")
 INPUT_FILE_BOOKMEAS_2w_b = os.path.join(DATA_DIR, "bookmeas_2_weeks_balanced.parquet")
 INPUT_FILE_BOOKMEAS_4w = os.path.join(DATA_DIR, "bookmeas", "4_week.parquet")
 
@@ -59,10 +62,11 @@ OUTPUT_BOOKMEASMAT_FILE_SPEARMAN = os.path.join(DATA_DIR, "bookmeasmat_cleaned_s
 
 # Bookmeas dataset output files
 OUTPUT_FILE_BOOKMEAS_1w = os.path.join(DATA_DIR, "bookmeas", "bookmeas_1_week.parquet")
+OUTPUT_FILE_BOOKMEAS_1w_b = os.path.join(DATA_DIR, "bookmeas", "bookmeas_1_week_balanced.parquet")
 OUTPUT_FILE_BOOKMEAS_1w_enc = os.path.join(DATA_DIR, "bookmeas_1_week_encoded.parquet")
 OUTPUT_FILE_BOOKMEAS_1w_enc_f = os.path.join(DATA_DIR, "bookmeas_1_week_filtered.parquet")
 OUTPUT_FILE_BOOKMEAS_2w = os.path.join(DATA_DIR, "bookmeas", "bookmeas_2_weeks.parquet")
-OUTPUT_FILE_BOOKMEAS_2w_enc = os.path.join(DATA_DIR, "bookmeas_2_weeks_encoded.parquet")
+OUTPUT_FILE_BOOKMEAS_2w_enc = os.path.join(DATA_DIR, "bookmeas", "bookmeas_2_weeks_encoded.parquet")
 OUTPUT_FILE_BOOKMEAS_2w_enc_f = os.path.join(DATA_DIR, "bookmeas_2_weeks_filtered.parquet")
 OUTPUT_FILE_BOOKMEAS_2w_b = os.path.join(DATA_DIR, "bookmeas_2_weeks_balanced.parquet")
 

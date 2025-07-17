@@ -8,7 +8,7 @@ def main():
         output_main_path=OUTPUT_FILE_MEAS_SL_b,
         serial_col="serial_number_id",
         bookstate_col="book_state",
-        zero_to_nonzero_ratio=2,  # keep up to x zeros
+        zero_to_nonzero_ratio=1,  # keep up to x zeros
         random_state=42
     )
 
