@@ -7,9 +7,10 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
     classification_report
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 from sklearn.pipeline import Pipeline
+import multiprocessing
 
 
-def run_logistic_regression(X_train, y_train, X_test, y_test, random_state=42):
+def run_logistic_regression_gridsearch(X_train, y_train, X_test, y_test, random_state=42):
     # Define pipeline
     pipe = Pipeline([
         ('imputer', SimpleImputer(strategy='mean')),
@@ -28,7 +29,7 @@ def run_logistic_regression(X_train, y_train, X_test, y_test, random_state=42):
         #'logreg__tol': [1e-3, 1e-4, 1e-5]  # Optional
     }
 
-    # RandomSearchCV
+    # Or RandomSearchCV
     grid = GridSearchCV(
         estimator=pipe,
         param_grid=param_grid,
@@ -41,7 +42,7 @@ def run_logistic_regression(X_train, y_train, X_test, y_test, random_state=42):
     # Fit
     grid.fit(X_train, y_train)
 
-    # Best model
+    # Best prediction_models
     best_model = grid.best_estimator_
 
     # Predict
@@ -58,9 +59,41 @@ def run_logistic_regression(X_train, y_train, X_test, y_test, random_state=42):
 
     return best_model
 
+def run_logistic_regression(X_train, y_train, X_test, y_test, random_state=42):
+    # Use all available cores minus one
+    n_jobs = max(multiprocessing.cpu_count() - 1, 1)
+
+    # Define pipeline
+    pipe = Pipeline([
+        ('imputer', SimpleImputer(strategy='mean')),
+        ('logreg', LogisticRegression(
+            penalty='l1',
+            C=0.5,
+            class_weight='balanced',
+            solver='saga',
+            max_iter=5000,
+            n_jobs=n_jobs,
+            random_state=random_state
+        ))
+    ])
+
+    # Fit pipeline
+    pipe.fit(X_train, y_train)
+
+    # Predict
+    y_pred = pipe.predict(X_test)
+
+    # Metrics
+    print("Accuracy:", accuracy_score(y_test, y_pred))
+    print("Precision:", precision_score(y_test, y_pred, average='weighted'))
+    print("Recall:", recall_score(y_test, y_pred, average='weighted'))
+    print("F1 Score:", f1_score(y_test, y_pred, average='weighted'))
+    print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
 
 def plot_coefficients(best_model, feature_names, class_index):
-    # Access model inside pipeline
+    # Access prediction_models inside pipeline
     logistic_model = best_model.named_steps['logreg']
 
     coefs = logistic_model.coef_[class_index]
