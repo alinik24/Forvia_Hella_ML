@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from datetime import datetime
+from src.data_preprocessing.config import INPUT_FILE_BOOKMEAS_4w
 
 def analyze_serial_numbers(source_file_path, unique_serial_numbers_csv_path):
     """
@@ -122,7 +123,7 @@ def analyze_serial_numbers(source_file_path, unique_serial_numbers_csv_path):
 # --- Main execution for Serial Number Analysis ---
 if __name__ == "__main__":
     # Define the path to the original source Parquet file
-    original_source_parquet_file = "/home/alinzk/Forvia_Hella/4_week_v2.parquet"
+    original_source_parquet_file = INPUT_FILE_BOOKMEAS_4w
 
     # Define the path to the CSV containing unique serial number IDs from the first script's output.
     # IMPORTANT: You will need to replace 'YOUR_TIMESTAMP_HERE' with the actual timestamp

@@ -1,14 +1,15 @@
 import dask.dataframe as dd
 import os
-from src.data_preprocessing.config import INPUT_FILE_BOOKINGS_SL, INPUT_FILE_MATERIALS_2w, INPUT_FILE_MEAS_SL, INPUT_FILE_MATERIALS_1w_enc, INPUT_FILE_BOOKMEAS_2w, FINAL_FILE_BOOKMEASMAT_2w
+from src.data_preprocessing.config import INPUT_FILE_BOOKMEAS_4w_snid_f, INPUT_FILE_BOOKINGS_SL, INPUT_FILE_MATERIALS_2w, INPUT_FILE_MEAS_SL, INPUT_FILE_MATERIALS_1w_enc, INPUT_FILE_BOOKMEAS_2w, FINAL_FILE_BOOKMEASMAT_2w
 
 FILES = {
-    "bookings": INPUT_FILE_BOOKINGS_SL,
-    "materials": INPUT_FILE_MATERIALS_2w,
+    #"bookings": INPUT_FILE_BOOKINGS_SL,
+    #"materials": INPUT_FILE_MATERIALS_2w,
     #"materialsenc": INPUT_FILE_MATERIALS_1w_enc,
-    "measurements": INPUT_FILE_MEAS_SL,
+    #"measurements": INPUT_FILE_MEAS_SL,
     #"bookmeas": INPUT_FILE_BOOKMEAS_2w,
     #"bookmeasmat": FINAL_FILE_BOOKMEASMAT_2w,
+    "bookmeas_filtered": INPUT_FILE_BOOKMEAS_4w_snid_f
 }
 
 def inspect_parquet_with_dask(file_path, sample_size=5):
