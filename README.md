@@ -39,4 +39,11 @@ docker build --no-cache -t your-image-name:latest .
 
 ### Manual
 
-- TODO
+Execution Order:
+
+1. Filter Time (Optional)
+2. Balancing
+3. Encoding
+4. Choose one of the feature importance models
+5. Filter columns accordingly
+6. Use the prediciton model for predictive quality
