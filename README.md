@@ -1,41 +1,83 @@
 # Forvia_Project
 
-## Installation guide
+# Guide: Installing Dependencies with `requirements.txt`
 
-For Windows:
+This guide will walk you through the process of setting up a Python environment and installing dependencies listed in a `requirements.txt` file using two different methods: Python's built-in `venv` module and `uv`.
 
-1. Download and install **Docker Desktop** (https://www.docker.com/products/docker-desktop/)
-2. Download and Install **WSL** (Windows 11 recommmended for WSL2, Hyper-V should not be used with Windows 11, https://learn.microsoft.com/en-us/windows/wsl/install)
-3. Install **Ubuntu** in the Linux Subsystem if it is not installed per default (**Any other distribution can be used, but is not tested!** )
-4. Set up Docker Desktop
-5. Go to the Docker Engine settings and check if WSL and the installed Linux Distro (Ubuntu in this case) is used by Docker when running the engine
-   1. If not used, check the Distro you want to use and restart the engine
-6. Continue with the Docker Manual
+## Prerequisites
 
+- Python installed on your system.
+- `pip` installed and updated.
+- `uv` installed if you plan to use it.
 
-For Linux:
+## Method 1: Using Python's `venv`
 
-1. Follow the Steps included in the official installations guide for Ubuntu https://docs.docker.com/engine/install/ubuntu/ or any other distribution you are using https://docs.docker.com/engine/install/
-2. Continue with the Docker Manual
+### Step 1: Create a Virtual Environment
 
-## Docker Manual
-
-### Step 1
-
-Open the terminal in your IDE or use Powershell (or whichever you prefer) in the directory where the Dockerfile is situated
-
-### Step 2
-
-To build and run the docker image use the following commands in you terminal:
+Open your terminal or command prompt and navigate to your project directory. Run the following command to create a virtual environment:
 
 ```bash
-docker build --no-cache -t your-image-name:latest .
-```
-```bash
-- docker run -it --rm your-image-name:tag
+python -m venv myenv
 ```
 
-*Note: Replace your-image-name with whatever you like*
+Here, myenv is the name of your virtual environment. You can replace it with any name you prefer.
+
+### Step 2: Activate the Virtual Environment
+
+- On Windows:
+```bash
+myenv\Scripts\activate
+```
+
+- On macOS and Linux:
+```bash
+source myenv/bin/activate
+```
+
+### Step 3: Install Dependencies
+
+With the virtual environment activated, you can now install the dependencies listed in your requirements.txt file. Run the following command:
+
+```bash
+pip install -r requirements.txt
+```
+This command will read the requirements.txt file and install all the specified packages and their dependencies.
+
+## Method 2: Using uv
+
+### Step 1: Install uv
+If you haven't already installed uv, you can do so by following the instructions on the official uv GitHub repository.
+
+### Step 2: Create a Virtual Environment
+
+Navigate to your project directory and run the following command to create a virtual environment using uv:
+```bash
+uv venv myenv
+```
+
+### Step 3: Activate the Virtual Environment
+
+- On Windows:
+```bash
+myenv\Scripts\activate
+```
+
+- On macOS and Linux:
+```bash
+source myenv/bin/activate
+```
+
+### Step 4: Install Dependencies
+With the virtual environment activated, you can install the dependencies listed in your requirements.txt file using uv. Run the following command:
+```bash
+uv pip install -r requirements.txt
+```
+
+This command will read the requirements.txt file and install all the specified packages and their dependencies.
+
+Both methods allow you to create isolated Python environments and install dependencies efficiently. Using venv is a built-in solution that comes with Python, while uv offers additional features and potentially faster performance. Choose the method that best fits your needs and workflow.
+
+___
 
 ### Manual
 
