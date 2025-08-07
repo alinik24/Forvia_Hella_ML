@@ -1,5 +1,5 @@
 from src.data_preprocessing.config import INPUT_FILE_MEAS_SL_enc
-from src.data_preprocessing.utils.log_reg_utils import *
+from src.data_preprocessing.utils.model_utils.log_reg_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 

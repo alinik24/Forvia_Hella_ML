@@ -1,16 +1,36 @@
-from src.data_preprocessing.config import INPUT_FILE_BOOKMEAS_2w, INPUT_FILE_BOOKMEAS_2w_b
+# ---- Balancing of bookmeas dataset ----
+from pathlib import Path
+
+from src.data_preprocessing.config import save_last_run
 from src.data_preprocessing.utils.balance_utils import balance_by_state_per_serial
+from src.data_preprocessing.utils.load_paths import load_last_run
 
 
 def main():
+    reuse_last = input("Reuse last input/output paths? (y/n): ").strip().lower() == "y"
+
+    if reuse_last:
+        paths = load_last_run()
+        input_main_path = paths["input_path"]
+        output_main_path = paths["output_path"]
+    else:
+        base_input_dir = input("Enter base input directory: ").strip()
+        specific_input_filename = input(
+            "Enter specific input filename (e.g. bookmeas_1_week_2025-03-01_to_2025-03-11.parquet): ").strip()
+        input_main_path = str(Path(base_input_dir) / specific_input_filename)
+
+        output_main_path = input("Enter output file path (can include timestamp): ").strip()
+
     balance_by_state_per_serial(
-        input_main_path=INPUT_FILE_BOOKMEAS_2w,
-        output_main_path=INPUT_FILE_BOOKMEAS_2w_b,
+        input_main_path=input_main_path,
+        output_main_path=output_main_path,
         serial_col="serial_number_id",
         bookstate_col="book_state",
-        zero_to_nonzero_ratio=1,  # keep up to x zeros
+        zero_to_nonzero_ratio=1,
         random_state=42
     )
+
+    save_last_run(input_path=input_main_path, output_path=output_main_path, version="v1")
 
 
 if __name__ == "__main__":

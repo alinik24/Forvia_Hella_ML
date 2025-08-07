@@ -1,5 +1,5 @@
 from src.data_preprocessing.config import INPUT_FILE_BOOKINGS_SL_enc
-from src.data_preprocessing.utils.log_reg_utils import *
+from src.data_preprocessing.utils.model_utils.log_reg_utils import *
 
 
 def main():

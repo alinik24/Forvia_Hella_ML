@@ -1,14 +1,18 @@
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LogisticRegression
+import h2o
+import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
 
 from src.data_preprocessing.config import save_last_run
 from src.data_preprocessing.utils.load_paths import load_last_run
-from src.data_preprocessing.utils.model_utils.log_reg_utils import *
+from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import plot_feature_importance
+from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import train_gbm_model
 
 
-def main():
+def an():
+    # Start H2O cluster
+    h2o.init(max_mem_size_GB=24)
+
+    # Load and split data
     print("Loading bookmeas dataset...")
     reuse_last = input("Reuse last input path? (y/n): ").strip().lower() == "y"
 
@@ -28,32 +32,29 @@ def main():
         print(f"Error loading dataset: {e}")
         return
 
-    # Separate features and target
-    X = df.drop(columns=['target', 'has_failures'])
-    y = df['target']
+    X = df.drop(columns=["target"])
+    y = df["target"]
 
-    # Split into training and testing sets
-    print("Creating train and test splits...")
     X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.2,
-        random_state=42,
-        stratify=y              # Maintain class distribution
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # Run logistic regression with the scaled features
-    print("Running logistic regression model...")
-    #best_model = run_logistic_regression_gridsearch(X_train, y_train, X_test, y_test)
-    best_model = run_logistic_regression(X_train, y_train, X_test, y_test)
+    # Train model
+    model, features = train_gbm_model(X_train, y_train, X_test, y_test)
 
-    # Plot coefficients for each class
-    plot_coefficients(best_model, X_train.columns, class_index=0)
-    plot_coefficients(best_model, X_train.columns, class_index=1)
-    plot_coefficients(best_model, X_train.columns, class_index=2)
+    # Plot feature importance
+    plot_feature_importance(model)
 
     # Save last input path
     save_last_run(input_path=input_path, output_path="", version="v1")
+
+    # Shutdown H2O (optional)
+    h2o.shutdown(prompt=False)
+
+
+def main():
+    h2o.init(ip="localhost", port="8080", max_mem_size_GB=24)
+    h2o.demo("glm")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
-import pandas as pd
-import h2o
-from h2o.automl import H2OAutoML
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
+from h2o.automl import H2OAutoML
 from sklearn.metrics import confusion_matrix, classification_report, roc_auc_score, roc_curve
-import numpy as np
+
+import h2o
 
 # Load the dataset from Parquet
 df = pd.read_parquet('dataset.parquet')
@@ -33,10 +33,11 @@ x.remove(y)
 
 # Configure AutoML for binary classification
 h2o_automl = H2OAutoML(
-    max_runtime_secs=5*60,  # 5 minutes
+    max_runtime_secs=5 * 60,  # 5 minutes
     seed=666,
     sort_metric='logloss',  # Primary metric for binary classification
-    include_algos=['DRF', 'GLM', 'XGBoost', 'GBM', 'DeepLearning', 'NaiveBayes', 'StackedEnsemble'],  # All H2O classifiers
+    include_algos=['DRF', 'GLM', 'XGBoost', 'GBM', 'DeepLearning', 'NaiveBayes', 'StackedEnsemble'],
+    # All H2O classifiers
     nfolds=5,  # 5-fold cross-validation
     keep_cross_validation_predictions=True,  # For detailed analysis
     export_checkpoints_dir=None  # Avoid saving models to disk
@@ -83,8 +84,8 @@ print(classification_report(y_actual, y_pred_labels))
 # Plot confusion matrix
 cm = confusion_matrix(y_actual, y_pred_labels, labels=['pass', 'fail'])
 plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-            xticklabels=['pass', 'fail'], 
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=['pass', 'fail'],
             yticklabels=['pass', 'fail'])
 plt.title('Confusion Matrix - Leader Model')
 plt.ylabel('Actual')

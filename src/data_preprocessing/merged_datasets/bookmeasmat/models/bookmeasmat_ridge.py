@@ -1,5 +1,5 @@
 from src.data_preprocessing.config import FINAL_FILE_BOOKMEASMAT_2w_enc
-from src.data_preprocessing.utils.ridge_utils import *
+from src.data_preprocessing.utils.model_utils.ridge_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 # TODO
