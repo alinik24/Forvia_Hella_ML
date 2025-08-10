@@ -7,6 +7,7 @@ from src.data_preprocessing.utils.load_paths import load_last_run
 
 
 def main():
+    print("Loading config...")
     reuse_last = input("Reuse last input/output paths? (y/n): ").strip().lower() == "y"
 
     if reuse_last:
@@ -19,7 +20,11 @@ def main():
             "Enter specific input filename (e.g. bookmeas_1_week_2025-03-01_to_2025-03-11.parquet): ").strip()
         input_main_path = str(Path(base_input_dir) / specific_input_filename)
 
-        output_main_path = input("Enter output file path (can include timestamp): ").strip()
+        # 🎯 REVISION: Automatically create the output path with a suffix
+        input_path_obj = Path(input_main_path)
+        output_filename = f"{input_path_obj.stem}_balanced{input_path_obj.suffix}"
+        output_main_path = str(input_path_obj.parent / output_filename)
+        print(f"Output path automatically set to: {output_main_path}")
 
     balance_by_state_per_serial(
         input_main_path=input_main_path,

@@ -17,7 +17,7 @@ def main():
 
     analyze_and_transform_data(input_path)
     create_n_day_dataset(
-        n_days=10,
+        n_days=4,
         input_path=input_path,
         output_path=output_path
     )

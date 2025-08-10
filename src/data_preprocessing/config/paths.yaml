@@ -1,6 +1,6 @@
 last_run:
-  input_path: /home/alinzk/Forvia_Project/data/output/bookmeas/bookmeas_4_week_anonym_final_filtered_20250810_023451.parquet
-  output_path: /home/alinzk/Forvia_Project/data/output/encoded_bookmeas.parquet
-  timestamp: '2025-08-10 04:06:44'
+  input_path: /home/alinzk/Forvia_Project/data/output/bookmeas_4_week_anonym_final_filtered_20250810_023451_train_20250810_balanced.parquet
+  output_path: /home/alinzk/Forvia_Project/data/output/bookmeas_4_week_anonym_final_filtered_20250810_023451_train_20250810_balanced_encoded.parquet
+  timestamp: '2025-08-10 12:13:07'
   version: v1
   run_at: /home/alinzk/Forvia_Project
