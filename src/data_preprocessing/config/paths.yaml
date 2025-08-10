@@ -1,0 +1,6 @@
+last_run:
+  input_path: /home/alinzk/Forvia_Project/data/output/bookmeas/bookmeas_4_week_anonym_final_filtered_20250810_023451.parquet
+  output_path: /home/alinzk/Forvia_Project/data/output/encoded_bookmeas.parquet
+  timestamp: '2025-08-10 04:06:44'
+  version: v1
+  run_at: /home/alinzk/Forvia_Project

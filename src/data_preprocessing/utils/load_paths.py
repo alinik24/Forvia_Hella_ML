@@ -10,7 +10,7 @@ def load_last_run(config_dir: str = None):
     Loads only the last_run section from the YAML file.
     """
     if config_dir is None:
-        config_dir = Path(__file__).resolve().parents[2] / "src" / "data_preprocessing" / "config"
+        config_dir = Path(__file__).resolve().parents[2] /  "data_preprocessing" / "config"
     else:
         config_dir = Path(config_dir).resolve()
 

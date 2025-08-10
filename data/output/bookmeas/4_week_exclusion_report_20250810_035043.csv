@@ -1,0 +1,24 @@
+Metric,Value
+--- Source Data (Before Exclusion) ---,
+Total Rows,21030857
+Unique serial number IDs,54395
+Unique station_desc,11
+Book State 0 Row Count (Source Data (Before Exclusion)),20963902
+Book State 1 Row Count (Source Data (Before Exclusion)),66734
+Book State 2 Row Count (Source Data (Before Exclusion)),221
+Total Unique IDs with either book state 1 or 2 (Source Data (Before Exclusion)),782
+Total Unique IDs with both book state 1 and 2 (Source Data (Before Exclusion)),103
+Total Unique IDs with only book state 1 (Source Data (Before Exclusion)),561
+--- Filtered Data (After Exclusion) ---,
+Total Rows,21021192
+Unique serial number IDs,54389
+Unique station_desc,11
+Book State 0 Row Count (Filtered Data (After Exclusion)),20963835
+Book State 1 Row Count (Filtered Data (After Exclusion)),57142
+Book State 2 Row Count (Filtered Data (After Exclusion)),215
+Total Unique IDs with either book state 1 or 2 (Filtered Data (After Exclusion)),776
+Total Unique IDs with both book state 1 and 2 (Filtered Data (After Exclusion)),97
+Total Unique IDs with only book state 1 (Filtered Data (After Exclusion)),561
+--- Summary of Exclusions ---,
+Total Rows Eliminated,9665
+Serial Number IDs Eliminated,6
