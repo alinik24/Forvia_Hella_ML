@@ -4,7 +4,7 @@ import pyarrow.parquet as pq
 
 from src.data_preprocessing.config import save_last_run
 from src.data_preprocessing.utils.load_paths import load_last_run
-from src.data_preprocessing.utils.utils import filter_parquet_columns
+from src.data_preprocessing.utils.utils import filter_parquet_columns_contains
 
 
 def main():
@@ -23,17 +23,33 @@ def main():
     input_path = Path(input_path).resolve()
     output_path = input_path.with_name(input_path.stem + "_filtered.parquet")
 
-    # Change according to feature selection
-    keep_columns = [
-        booking_id, book_state, serial_number_id, station_id, station_diag_id, workorder_id, part_group, erp_group_id,
-        workstep_id, line_id, part_desc, workorder_desc, component_id, supplier_id, container_number,
-        supplier_order_date_code, supplier_order_number
+    # Base column names to preserve
+    base_keep_columns = [
+        "booking_id",
+        "book_state",
+        "serial_number_id",
+        "station_id",
+        "station_diag_id",
+        "workorder_id",
+        "part_group",
+        "erp_group_id",
+        "workstep_id",
+        "line_id",
+        "part_desc",
+        "workorder_desc",
+        "measure_value",
+        "catalog_id",
+        "teststep_id",
+        "measurement_name",
+        "measurement_unit",
+        "measurement_type",
+        "lower_limit",
+        "upper_limit",
     ]
 
     print(f"Filtering columns from: {input_path}")
     try:
-        filter_parquet_columns(str(input_path), str(output_path), keep_columns)
-        print(f"Filtered dataset saved to: {output_path}")
+        filter_parquet_columns_contains(str(input_path), str(output_path), base_keep_columns)
     except Exception as e:
         print(f"Error filtering dataset: {e}")
         return

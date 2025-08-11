@@ -6,18 +6,25 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 
-def filter_parquet_columns(input_path, output_path, keep_columns):
+def filter_parquet_columns_contains(input_path, output_path, base_names):
     """
-    Filter a Parquet file by keeping only the specified columns.
+    Filter a Parquet file by keeping columns that contain any of the base names.
 
     Parameters:
         input_path (str): Path to the source Parquet file.
         output_path (str): Path to save the filtered file.
-        keep_columns (list): Columns to retain in the output file.
+        base_names (list): Base column name substrings to match.
     """
     table = pq.read_table(input_path)
-    filtered_table = table.select(keep_columns)
+    all_columns = table.column_names
 
+    # Keep columns that contain any of the base names
+    keep_columns = [
+        col for col in all_columns
+        if any(base in col for base in base_names)
+    ]
+
+    filtered_table = table.select(keep_columns)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     pq.write_table(filtered_table, output_path)
     print(f"Filtered dataset saved to: {output_path}")
