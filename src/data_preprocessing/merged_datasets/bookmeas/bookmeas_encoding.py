@@ -20,7 +20,7 @@ def main():
             "Enter specific input filename (e.g. bookmeas_1_week_2025-03-12_to_2025-03-27.parquet): ").strip()
         input_main_path = str(Path(base_input_dir) / specific_input_filename)
 
-        # 🎯 REVISION: Automatically create the output path with a suffix
+        # REVISION: Automatically create the output path with a suffix
         input_path_obj = Path(input_main_path)
         # Extract filename without extension, add suffix, then re-add extension
         output_filename = f"{input_path_obj.stem}_encoded{input_path_obj.suffix}"
