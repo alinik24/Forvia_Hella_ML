@@ -1,0 +1,10 @@
+{
+    "data_choice": "1",
+    "original_raw_path": "C:\\Desktop\\Research and Thesis\\RWML projects\\Forvia_Project\\Forvia_Project\\data\\output_2025-04-23_to_2025-04-24\\part.0.parquet",
+    "train_path": null,
+    "test_path": null,
+    "output_path": "C:\\Desktop\\Research and Thesis\\RWML projects\\Forvia_Project\\Forvia_Project\\data\\output\\h2o_results",
+    "target_column": "book_state",
+    "use_validation_frame": true,
+    "timestamp": "2025-08-11T05:18:56.571151"
+}

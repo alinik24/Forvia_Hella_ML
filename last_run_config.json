@@ -1,0 +1,7 @@
+{
+    "train_path": "C:\\Users\\alina\\Downloads\\bookmeas_4_week_anonym_final_filtered_20250810_023451_train_20250810_balanced_encoded.parquet",
+    "test_path": "C:\\Users\\alina\\Downloads\\bookmeas_4_week_anonym_final_filtered_20250810_023451_test_20250810_encoded.parquet",
+    "output_path": "C:\\Desktop\\Research and Thesis\\RWML projects\\Forvia_Project\\Forvia_Project\\data\\output",
+    "target_column": "target",
+    "timestamp": "2025-08-10T15:34:04.294456"
+}

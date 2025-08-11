@@ -1,0 +1,43 @@
+{
+    "timestamp": "2025-08-11T05:45:49.459389",
+    "execution_summary": {
+        "total_models_trained": 10,
+        "training_time_minutes": 24.49,
+        "successful_completion": true
+    },
+    "best_model_info": {
+        "model_id": "GBM_grid_1_AutoML_1_20250811_52024_model_1",
+        "algorithm_type": "H2OGradientBoostingEstimator"
+    },
+    "performance_metrics": {
+        "test_accuracy": 1.0,
+        "test_auc": null,
+        "has_classification_report": true
+    },
+    "dataset_information": {
+        "train_samples": 2326741,
+        "test_samples": 258527,
+        "features": 42,
+        "target_column": "book_state"
+    },
+    "technical_details": {
+        "h2o_version": "3.46.0.7",
+        "cross_validation_folds": 5,
+        "balance_classes_enabled": true,
+        "included_algorithms": [
+            "GBM",
+            "DRF",
+            "DeepLearning",
+            "StackedEnsemble"
+        ],
+        "excluded_algorithms": [
+            "GLM"
+        ]
+    },
+    "model_performance_distribution": {
+        "best_logloss": 0.0,
+        "mean_logloss": 6.6e-05,
+        "best_auc": null,
+        "mean_auc": null
+    }
+}
