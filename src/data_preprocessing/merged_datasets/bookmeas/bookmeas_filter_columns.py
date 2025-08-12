@@ -45,6 +45,7 @@ def main():
         "measurement_type",
         "lower_limit",
         "upper_limit",
+        "target"
     ]
 
     print(f"Filtering columns from: {input_path}")
