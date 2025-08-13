@@ -84,9 +84,10 @@ ___
 Execution Order:
 
 1. Filter Bookstates
-2. Filter Time (Optional) & Filter Correlations (corr_cleaning)
+2. Filter Time (Optional)
 3. Balancing 
 4. Encoding 
-5. Choose one of the feature importance models 
-6. Filter columns accordingly 
-7. Use the predictoon model for predictive quality
+5. Clean Correlations 
+6. Choose one of the feature importance models 
+7. Filter columns accordingly 
+8. Use the prediction model for predictive quality
