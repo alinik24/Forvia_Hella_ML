@@ -1,13 +1,30 @@
-from src.data_preprocessing.config import INPUT_FILE_MEAS_SL_enc
-from src.data_preprocessing.utils.model_utils.log_reg_utils import *
+from src.data_preprocessing.config import save_last_run
+from src.data_preprocessing.utils.load_paths import load_last_run
+from src.data_preprocessing.utils.model_utils.lasso_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 
 def main():
-    print("Loading measurements dataset...")
-    df = pd.read_parquet(INPUT_FILE_MEAS_SL_enc)
+    reuse_last = input("Reuse last input path? (y/n): ").strip().lower() == "y"
+
+    if reuse_last:
+        last_paths = load_last_run()
+        input_path = last_paths.get("input_path")
+        if not input_path:
+            print("No last input path found in config. Please enter manually.")
+            input_path = input("Enter path to encoded measurements dataset (parquet): ").strip()
+    else:
+        input_path = input("Enter path to encoded measurements dataset (parquet): ").strip()
+
+    print(f"Loading measurements dataset from {input_path} ...")
+    try:
+        df = pd.read_parquet(input_path)
+    except Exception as e:
+        print(f"Error loading dataset: {e}")
+        return
 
     X = df.drop(columns=['target'])
+    X = X.drop(columns=['has_failures'])
     y = df['target']
 
     print("Reporting missing values...")
@@ -38,6 +55,9 @@ def main():
 
     print("Plotting all non-zero coefficients sorted by magnitude...")
     plot_all_nonzero_coefs_sorted(lasso_model, X.columns)
+
+    # Save last input path
+    save_last_run(input_path=input_path, output_path="", version="v1")
 
 
 if __name__ == "__main__":

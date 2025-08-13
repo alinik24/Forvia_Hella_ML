@@ -1,11 +1,27 @@
-from src.data_preprocessing.config import INPUT_FILE_BOOKINGS_SL_enc
+from src.data_preprocessing.config import save_last_run
+from src.data_preprocessing.utils.load_paths import load_last_run
 from src.data_preprocessing.utils.model_utils.ridge_utils import *
 from src.data_preprocessing.utils.utils import print_nan_columns_info
 
 
 def main():
-    print("Loading materials dataset...")
-    df = pd.read_parquet(INPUT_FILE_BOOKINGS_SL_enc)
+    reuse_last = input("Reuse last input path? (y/n): ").strip().lower() == "y"
+
+    if reuse_last:
+        last_paths = load_last_run()
+        input_path = last_paths.get("input_path")
+        if not input_path:
+            print("No last input path found in config. Please enter manually.")
+            input_path = input("Enter path to encoded bookings dataset (parquet): ").strip()
+    else:
+        input_path = input("Enter path to encoded bookings dataset (parquet): ").strip()
+
+    print(f"Loading bookings dataset from {input_path} ...")
+    try:
+        df = pd.read_parquet(input_path)
+    except Exception as e:
+        print(f"Error loading dataset: {e}")
+        return
 
     X = df.drop(columns=['target'])
     y = df['target']
@@ -15,7 +31,7 @@ def main():
     print("Cleaning up missing values...")
     X = X.dropna(axis=1, how='any')
 
-    print("Running Ridge regression on materials dataset...")
+    print("Running Ridge regression on bookings dataset...")
     ridge_model = run_ridge(X, y)
 
     print(f"Best alpha: {ridge_model.alpha_}")
@@ -32,6 +48,9 @@ def main():
 
     print("Plotting distribution of coefficients...")
     plot_nonzero_coef_distribution(ridge_model)
+
+    # Save last input path
+    save_last_run(input_path=input_path, output_path="", version="v1")
 
 
 if __name__ == "__main__":

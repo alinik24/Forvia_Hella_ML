@@ -63,7 +63,7 @@ def plot_all_coefs_sorted(ridge_model, feature_names):
     coefs = pd.Series(ridge_model.coef_, index=feature_names)
     sorted_coefs = coefs.sort_values(key=abs)
 
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(12, len(coefs) * 0.25))
     sorted_coefs.plot(kind='barh', color='slateblue')
     plt.title('All Ridge Coefficients Sorted by Magnitude')
     plt.xlabel('Coefficient Value')

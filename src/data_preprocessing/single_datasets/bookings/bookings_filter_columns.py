@@ -1,4 +1,4 @@
-# --- Filter columns from the materials dataset ---
+# --- Filter columns from the bookings single line dataset ---
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -26,9 +26,8 @@ def main():
 
     # Base column names to preserve
     base_keep_columns = [
-        "component_position", "component_id", "serial_number_id",
-        "station_id", "supplier_id", "mounting_place",
-        "container_number", "panel_position", "created_at", "book_state"
+        "book_stamp", "book_state", "booking_id", "serial_number_id",
+        "workstep_number_mes", "station_id", "part_group", "created_at"
     ]
 
     print(f"Filtering columns from: {input_path}")

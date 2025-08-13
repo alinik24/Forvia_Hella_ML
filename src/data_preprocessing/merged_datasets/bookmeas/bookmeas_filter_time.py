@@ -1,8 +1,9 @@
-# ---- Preprocessing of materials dataset ----
+# ---- Preprocessing of bookmeas dataset ----
 
-from src.data_preprocessing.utils.load_paths import load_last_run
 from src.data_preprocessing.config import save_last_run
+from src.data_preprocessing.utils.load_paths import load_last_run
 from src.data_preprocessing.utils.time_filtering import analyze_and_transform_data, create_n_day_dataset
+
 
 def main():
     reuse_last = input("Reuse last paths? (y/n): ").strip().lower() == "y"
@@ -17,7 +18,7 @@ def main():
 
     analyze_and_transform_data(input_path)
     create_n_day_dataset(
-        n_days=2,
+        n_days=7,
         input_path=input_path,
         output_path=output_path
     )

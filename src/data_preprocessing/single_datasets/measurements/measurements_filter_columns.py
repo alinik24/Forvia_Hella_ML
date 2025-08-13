@@ -1,4 +1,3 @@
-# --- Filter columns from the materials dataset ---
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -26,9 +25,10 @@ def main():
 
     # Base column names to preserve
     base_keep_columns = [
-        "component_position", "component_id", "serial_number_id",
-        "station_id", "supplier_id", "mounting_place",
-        "container_number", "panel_position", "created_at", "book_state"
+        "measure_step_number", "measure_value", "created_at", "booking_id",
+        "book_state", "serial_number_id",
+        "station_id", "measurement_name", "measurement_unit",
+        "lower_limit", "upper_limit"
     ]
 
     print(f"Filtering columns from: {input_path}")

@@ -98,7 +98,7 @@ def plot_all_nonzero_coefs_sorted(lasso_model, feature_names):
     coefs = pd.Series(lasso_model.coef_, index=feature_names)
     non_zero = coefs[coefs != 0].sort_values(key=abs)
 
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(12, len(coefs) * 0.25))
     non_zero.plot(kind='barh', color='teal')
     plt.title('All Non-zero Lasso Coefficients Sorted by Magnitude')
     plt.xlabel('Coefficient Value')
