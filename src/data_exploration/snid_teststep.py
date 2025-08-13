@@ -1,13 +1,12 @@
-
 # This script processes the `measurements_single_line.parquet` file to compute, for each unique `serial_number_id`, the total row count
 # and the number of unique values for key attributes such as `catalog_id`, `recipe_revision_id`, `booking_id`, `product_id`,
 # `product_variant_id`, `part_number`, and `teststep_id`. It processes the Parquet file in large memory-efficient batches, tracks all
 # combinations, and writes the aggregated statistics to a timestamped CSV file. The script also verifies that the total row count
 # matches the original dataset, ensuring data integrity.
-import pyarrow.parquet as pqZ
-import pandas as pd
 import os
 from datetime import datetime
+
+import pyarrow.parquet as pqZ
 from tqdm import tqdm
 
 # Define paths
@@ -18,7 +17,8 @@ output_csv = os.path.join(base_path, f"serial_counts_all_{timestamp}.csv")
 
 # Step 1: Read the Parquet file and collect data
 print(f"Starting processing at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-print("Step 1: Collecting serial_number_id, teststep_id, catalog_id, recipe_revision_id, booking_id, product_id, product_variant_id, and part_number data")
+print(
+    "Step 1: Collecting serial_number_id, teststep_id, catalog_id, recipe_revision_id, booking_id, product_id, product_variant_id, and part_number data")
 
 parquet_file = pq.ParquetFile(measurements_file)
 total_rows = parquet_file.metadata.num_rows
@@ -35,7 +35,7 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
         df_batch = batch.to_pandas()
         # Replace null/NaN values with placeholders
         df_batch.fillna("unlabeled", inplace=True)
-        
+
         # Aggregate unique values and counts using groupby
         agg = df_batch.groupby('serial_number_id').agg({
             'catalog_id': lambda x: set(x),
@@ -47,7 +47,7 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
             'teststep_id': lambda x: set(x),
             'serial_number_id': 'count'  # Row count
         }).rename(columns={'serial_number_id': 'row_count'})
-        
+
         # Update serial_data
         for serial, row in agg.iterrows():
             if serial not in serial_data:
@@ -69,7 +69,7 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
             serial_data[serial]['part_numbers'].update(row['part_number'])
             serial_data[serial]['teststep_ids'].update(row['teststep_id'])
             serial_data[serial]['row_count'] += row['row_count']
-        
+
         pbar.update(len(df_batch))
         # Free memory
         del df_batch
@@ -119,7 +119,7 @@ with open(output_csv, 'w', encoding='utf-8') as f:
         "total_teststep_id_count\n"
     )
     f.write(headers)
-    
+
     # Write data rows
     for row in tqdm(output_data, desc="Writing table to CSV", unit="row"):
         values = [
@@ -151,6 +151,7 @@ print(f"Total rows in file: {total_rows}")
 if total_counted_rows == total_rows:
     print("Verification successful: All rows are accounted for.")
 else:
-    print(f"Verification failed: Sum of total teststep counts ({total_counted_rows}) does not match total rows ({total_rows}).")
+    print(
+        f"Verification failed: Sum of total teststep counts ({total_counted_rows}) does not match total rows ({total_rows}).")
 
 print(f"Processing complete at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

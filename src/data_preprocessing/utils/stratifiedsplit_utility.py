@@ -1,26 +1,26 @@
 # src/data_preprocessing/utils/stratifiedsplit_utility.py
 
+from datetime import datetime
+from pathlib import Path
+
 import dask.dataframe as dd
 import pandas as pd
-from pathlib import Path
-from typing import Tuple
-from datetime import datetime
 import pytz
-import numpy as np
+
 
 def stratified_split_and_save(
-    ddf: dd.DataFrame,
-    output_dir: str,
-    target_column: str,
-    time_column: str = 'created_at',
-    test_ratio: float = 0.1,  # Default to 10%
-    original_filename: str = 'data'
+        ddf: dd.DataFrame,
+        output_dir: str,
+        target_column: str,
+        time_column: str = 'created_at',
+        test_ratio: float = 0.1,  # Default to 10%
+        original_filename: str = 'data'
 ):
     """
     Splits a Dask DataFrame into training and testing sets by finding a unique
     time-based cutoff for each class to achieve the desired test ratio.
     """
-    print(f"Preparing time-based split to allocate exactly {100*test_ratio:.0f}% of each class to test set...")
+    print(f"Preparing time-based split to allocate exactly {100 * test_ratio:.0f}% of each class to test set...")
 
     if time_column not in ddf.columns:
         raise ValueError(f"Time column '{time_column}' not found in DataFrame columns: {ddf.columns.tolist()}")
@@ -56,7 +56,7 @@ def stratified_split_and_save(
             class_cutoffs[c] = None
             train_rows_list.append(ddf[ddf[target_column] == c])
             continue
-        
+
         print(f"Class {c}: Total={total_class_count}, Desired Test Count={n_test}, Desired Train Count={n_train}")
 
         # Get all instances for the class and sort by time
@@ -66,10 +66,10 @@ def stratified_split_and_save(
         # The cutoff is the timestamp of the (total_count - n_test)th instance
         # Dask `iloc` is not efficient, so we compute and use pandas `iloc`
         cutoff_index = n_train
-        if cutoff_index >= len(class_ddf): # Handle cases where n_train is larger than class size
-             cutoff_index = len(class_ddf) - 1
-             print(f"Warning: n_train for Class {c} exceeds class size. Using last instance as cutoff.")
-        
+        if cutoff_index >= len(class_ddf):  # Handle cases where n_train is larger than class size
+            cutoff_index = len(class_ddf) - 1
+            print(f"Warning: n_train for Class {c} exceeds class size. Using last instance as cutoff.")
+
         # Get the timestamp for the cutoff point
         class_cutoffs[c] = class_ddf.head(cutoff_index + 1).tail(1)[time_column].iloc[0]
 
@@ -98,15 +98,17 @@ def stratified_split_and_save(
 
     train_class_counts = train_ddf[target_column].value_counts().compute().reindex(classes).fillna(0).astype(int)
     test_class_counts = test_ddf[target_column].value_counts().compute().reindex(classes).fillna(0).astype(int)
-    
+
     original_dist = (class_counts / total_rows).round(4)
     train_dist = (train_class_counts / train_size if train_size > 0 else pd.Series(0, index=classes)).round(4)
     test_dist = (test_class_counts / test_size if test_size > 0 else pd.Series(0, index=classes)).round(4)
-    
+
     # Time ranges
     original_time_range = (ddf[time_column].min().compute(), ddf[time_column].max().compute())
-    train_time_range = (train_ddf[time_column].min().compute(), train_ddf[time_column].max().compute()) if train_size > 0 else (None, None)
-    test_time_range = (test_ddf[time_column].min().compute(), test_ddf[time_column].max().compute()) if test_size > 0 else (None, None)
+    train_time_range = (train_ddf[time_column].min().compute(),
+                        train_ddf[time_column].max().compute()) if train_size > 0 else (None, None)
+    test_time_range = (test_ddf[time_column].min().compute(),
+                       test_ddf[time_column].max().compute()) if test_size > 0 else (None, None)
 
     # Generate report DataFrame
     report_rows = [
@@ -121,12 +123,13 @@ def stratified_split_and_save(
     for c in classes:
         # Added original class count to the report
         report_rows.append({"Metric": f"Class {c} count (original)", "Value": class_counts[c]})
-        
+
         cutoff_val = str(class_cutoffs.get(c, "N/A"))
         report_rows.append({"Metric": f"Class {c} cutoff", "Value": cutoff_val})
         report_rows.append({"Metric": f"Class {c} count (train)", "Value": train_class_counts[c]})
         report_rows.append({"Metric": f"Class {c} count (test)", "Value": test_class_counts[c]})
-        report_rows.append({"Metric": f"Class {c} dist (orig/train/test)", "Value": f"{original_dist[c]}/{train_dist[c]}/{test_dist[c]}"})
+        report_rows.append({"Metric": f"Class {c} dist (orig/train/test)",
+                            "Value": f"{original_dist[c]}/{train_dist[c]}/{test_dist[c]}"})
 
     report_df = pd.DataFrame(report_rows)
 
@@ -149,7 +152,7 @@ def stratified_split_and_save(
         f.write("\n\n--- SAMPLE ROWS ---\n")
         samples_df.to_csv(f, index=False)
 
-    print(f"📄 Report & sample rows saved to: {report_path}")
+    print(f"Report & sample rows saved to: {report_path}")
 
     # Save the datasets
     train_filename = f"{original_filename}_train_{current_time}.parquet"
@@ -164,5 +167,5 @@ def stratified_split_and_save(
     train_ddf.to_parquet(train_path, engine='pyarrow', compression='snappy', write_index=False)
     test_ddf.to_parquet(test_path, engine='pyarrow', compression='snappy', write_index=False)
 
-    print(f"✅ Saved training data to: {train_path}")
-    print(f"✅ Saved testing data to: {test_path}")
+    print(f"Saved training data to: {train_path}")
+    print(f"Saved testing data to: {test_path}")

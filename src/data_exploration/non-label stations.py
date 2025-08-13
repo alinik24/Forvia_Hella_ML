@@ -44,14 +44,15 @@ Output Files:
 - `non_label_stations_summary.csv`
 - `final_processing_summary.csv`
 """
-import pandas as pd
-import pyarrow.parquet as pq
-import pyarrow.compute as pc
-import os
-from tqdm import tqdm
 import gc
-from datetime import datetime, timedelta
+import os
 import time
+from datetime import timedelta
+
+import pandas as pd
+import pyarrow.compute as pc
+import pyarrow.parquet as pq
+from tqdm import tqdm
 
 # Define paths
 base_path = 'C:/Users/alina/Downloads/data_hella/'
@@ -98,21 +99,21 @@ with tqdm(total=total_rows, desc="Scanning batches", unit="rows") as pbar:
         batch_start = time.time()
         df = batch.to_pandas()
         station_ids.update(df['station_id'].unique())
-        
+
         # Process timestamps: Convert UTC timezone-aware to timezone-naive
         df[timestamp_column] = pd.to_datetime(df[timestamp_column], errors='coerce', utc=True).dt.tz_localize(None)
         batch_min = df[timestamp_column].min()
         batch_max = df[timestamp_column].max()
-        
+
         if min_date is None or (batch_min is not pd.NaT and batch_min < min_date):
             min_date = batch_min
         if max_date is None or (batch_max is not pd.NaT and batch_max > max_date):
             max_date = batch_max
-        
+
         # Update progress and estimate time
         pbar.update(len(df))
         batch_times.append(time.time() - batch_start)
-        
+
         # Estimate remaining time every 10 batches
         if len(batch_times) % 10 == 0:
             avg_batch_time = sum(batch_times) / len(batch_times)
@@ -120,7 +121,7 @@ with tqdm(total=total_rows, desc="Scanning batches", unit="rows") as pbar:
             eta_seconds = avg_batch_time * remaining_batches
             eta = timedelta(seconds=int(eta_seconds))
             pbar.set_postfix({"ETA": str(eta)})
-        
+
         del df, batch
         gc.collect()
 
@@ -142,10 +143,12 @@ min_date_date = min_date_naive.normalize()
 max_date_date = max_date_naive.normalize()
 
 if not (min_date_date <= start_date_date <= max_date_date):
-    print(f"Error: Start date {start_date.strftime('%Y-%m-%d')} is outside the range {min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}.")
+    print(
+        f"Error: Start date {start_date.strftime('%Y-%m-%d')} is outside the range {min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}.")
     exit()
 if not (min_date_date <= end_date_date <= max_date_date):
-    print(f"Error: End date {end_date.strftime('%Y-%m-%d')} is outside the range {min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}.")
+    print(
+        f"Error: End date {end_date.strftime('%Y-%m-%d')} is outside the range {min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}.")
     exit()
 if start_date_date > end_date_date:
     print(f"Error: Start date {start_date.strftime('%Y-%m-%d')} is after end date {end_date.strftime('%Y-%m-%d')}.")
@@ -165,31 +168,32 @@ if not os.path.exists(sample_parquet):
     print(f"\nCreating sample dataset for non-label stations in period: {requested_period}")
     sample_dfs = []
     non_label_row_counts = {sid: 0 for sid in non_label_stations}
-    
+
     batch_times = []
     with tqdm(total=total_rows, desc="Filtering rows", unit="rows") as pbar:
         for batch in parquet_file.iter_batches(batch_size=batch_size):
             batch_start = time.time()
             df = batch.to_pandas()
-            
+
             # Filter non-label stations
             filtered_df = df[df['station_id'].isin(non_label_stations)]
-            
+
             if not filtered_df.empty:
                 # Apply temporal filter: Convert UTC timezone-aware to timezone-naive
-                filtered_df[timestamp_column] = pd.to_datetime(filtered_df[timestamp_column], errors='coerce', utc=True).dt.tz_localize(None)
+                filtered_df[timestamp_column] = pd.to_datetime(filtered_df[timestamp_column], errors='coerce',
+                                                               utc=True).dt.tz_localize(None)
                 sample_df = filtered_df[
-                    (filtered_df[timestamp_column] >= start_date) & 
+                    (filtered_df[timestamp_column] >= start_date) &
                     (filtered_df[timestamp_column] <= end_date)
-                ]
-                
+                    ]
+
                 if not sample_df.empty:
                     sample_dfs.append(sample_df)
                     # Update row counts for non-label stations
                     for sid in non_label_stations:
                         non_label_row_counts[sid] += len(sample_df[sample_df['station_id'] == sid])
                     pbar.update(len(sample_df))
-            
+
             # Update ETA
             batch_times.append(time.time() - batch_start)
             if len(batch_times) % 10 == 0:
@@ -198,10 +202,10 @@ if not os.path.exists(sample_parquet):
                 eta_seconds = avg_batch_time * remaining_batches
                 eta = timedelta(seconds=int(eta_seconds))
                 pbar.set_postfix({"ETA": str(eta)})
-            
+
             del df, filtered_df, sample_df, batch
             gc.collect()
-    
+
     if sample_dfs:
         sample_data = pd.concat(sample_dfs, ignore_index=True)
         # Preserve original timezone-aware timestamps in output
@@ -226,7 +230,8 @@ non_label_summary.to_csv(non_label_summary_csv, index=False)
 final_summary_data = [
     {'category': 'Metadata', 'key': 'Maximum Data Period', 'value': max_period},
     {'category': 'Metadata', 'key': 'Requested Period', 'value': requested_period},
-    {'category': 'Metadata', 'key': 'Total Processing Time', 'value': str(timedelta(seconds=int(time.time() - start_time)))},
+    {'category': 'Metadata', 'key': 'Total Processing Time',
+     'value': str(timedelta(seconds=int(time.time() - start_time)))},
     {'category': 'Metadata', 'key': 'Sample Rows', 'value': str(len(sample_data))},
     {'category': 'Metadata', 'key': 'Unique Serial Numbers', 'value': str(sample_data['serial_number'].nunique())}
 ]

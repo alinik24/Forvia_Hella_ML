@@ -34,14 +34,15 @@ Suitable for:
 - Pre-integration schema/data compatibility checks.
 - Detecting redundancy or divergence between tables in production datasets.
 """
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 import random
+
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import pyarrow.parquet as pq
 import scipy.stats as stats
 import seaborn as sns
-import matplotlib.pyplot as plt
 
 # Paths
 input_path = 'C:/Users/alina/Downloads/data_hella/'
@@ -54,6 +55,7 @@ os.makedirs(output_plots_dir, exist_ok=True)
 # Files to compare
 files = ['bookings.parquet', 'materials.parquet']
 
+
 # Function to get metadata (columns, types, row count)
 def get_parquet_metadata(file_path):
     try:
@@ -65,6 +67,7 @@ def get_parquet_metadata(file_path):
         return columns, total_rows, metadata, None
     except Exception as e:
         return None, None, None, str(e)
+
 
 # Function to sample a specific row (unchanged)
 def sample_row(file_path, row_idx, total_rows):
@@ -87,10 +90,12 @@ def sample_row(file_path, row_idx, total_rows):
     except Exception as e:
         return None, str(e)
 
+
 # Function to compare rows (unchanged)
 def compare_rows(row1, row2, shared_columns):
     if shared_columns:
-        matches = sum(1 for col in shared_columns if row1[col] == row2[col] or (pd.isna(row1[col]) and pd.isna(row2[col])))
+        matches = sum(
+            1 for col in shared_columns if row1[col] == row2[col] or (pd.isna(row1[col]) and pd.isna(row2[col])))
         similarity = matches / len(shared_columns)
     else:
         types1 = [type(v).__name__ for v in row1.values]
@@ -98,6 +103,7 @@ def compare_rows(row1, row2, shared_columns):
         type_matches = sum(1 for t1, t2 in zip(types1, types2) if t1 == t2)
         similarity = type_matches / max(len(types1), len(types2))
     return similarity
+
 
 # Function to compare distributions
 def compare_distributions(df1, df2, shared_columns):
@@ -138,6 +144,7 @@ def compare_distributions(df1, df2, shared_columns):
                 })
     return results
 
+
 # Function to check missing values
 def check_missing_values(df1, df2, shared_columns):
     results = []
@@ -151,6 +158,7 @@ def check_missing_values(df1, df2, shared_columns):
             'difference': abs(missing1 - missing2)
         })
     return results
+
 
 # Initialize results and metadata
 results = []
@@ -180,28 +188,31 @@ if all(file in column_comparison for file in files):
     shared_columns = cols1.intersection(cols2)
     shared_types = [
         col for col in shared_columns
-        if dict(column_comparison[files[0]]['columns']).get(col) == dict(column_comparison[files[1]]['columns']).get(col)
+        if
+        dict(column_comparison[files[0]]['columns']).get(col) == dict(column_comparison[files[1]]['columns']).get(col)
     ]
     print(f"Shared columns: {shared_columns}")
     print(f"Shared columns with same type: {shared_types}")
-    print(f"Metadata comparison: {column_comparison[files[0]]['metadata']} vs {column_comparison[files[1]]['metadata']}")
-    
+    print(
+        f"Metadata comparison: {column_comparison[files[0]]['metadata']} vs {column_comparison[files[1]]['metadata']}")
+
     # Load full datasets for distribution and missing value analysis
     df1 = pd.read_parquet(os.path.join(input_path, files[0]))
     df2 = pd.read_parquet(os.path.join(input_path, files[1]))
-    
+
     # Compare distributions
     dist_results = compare_distributions(df1, df2, shared_columns)
     print("\nDistribution Comparison Results:")
     for res in dist_results:
         print(f"Column {res['column']} ({res['type']}): {res['interpretation']} (p-value = {res['p_value']:.4f})")
-    
+
     # Check missing values
     missing_results = check_missing_values(df1, df2, shared_columns)
     print("\nMissing Values Comparison:")
     for res in missing_results:
-        print(f"Column {res['column']}: Bookings {res['missing_bookings_percent']:.2f}% vs Materials {res['missing_materials_percent']:.2f}% (Diff: {res['difference']:.2f}%)")
-    
+        print(
+            f"Column {res['column']}: Bookings {res['missing_bookings_percent']:.2f}% vs Materials {res['missing_materials_percent']:.2f}% (Diff: {res['difference']:.2f}%)")
+
     # Sample 500 rows (increased from 50)
     max_rows = min(column_comparison[files[0]]['total_rows'], column_comparison[files[1]]['total_rows'])
     if max_rows < 1:
@@ -217,8 +228,10 @@ if all(file in column_comparison for file in files):
     else:
         row_indices = random.sample(range(max_rows), min(500, max_rows))
         for i, row_idx in enumerate(row_indices, 1):
-            row1, error1 = sample_row(os.path.join(input_path, files[0]), row_idx, column_comparison[files[0]]['total_rows'])
-            row2, error2 = sample_row(os.path.join(input_path, files[1]), row_idx, column_comparison[files[1]]['total_rows'])
+            row1, error1 = sample_row(os.path.join(input_path, files[0]), row_idx,
+                                      column_comparison[files[0]]['total_rows'])
+            row2, error2 = sample_row(os.path.join(input_path, files[1]), row_idx,
+                                      column_comparison[files[1]]['total_rows'])
             if error1 or error2:
                 error = error1 or error2
                 print(f"Sample {i} (row {row_idx}): Error - {error}")

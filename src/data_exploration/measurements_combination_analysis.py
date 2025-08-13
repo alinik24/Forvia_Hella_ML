@@ -58,12 +58,13 @@
 # - Converts lower_limit/upper_limit to strings for parquet output to match input schema.
 # - Tracks overlapping measurement_names to verify grouping logic.
 
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
-from tqdm import tqdm
+
+import pandas as pd
 import pyarrow as pa
+import pyarrow.parquet as pq
+from tqdm import tqdm
 
 # Define paths
 output_dir = r"C:\Desktop\Research and Thesis\RWML projects\data_hella\output"
@@ -78,13 +79,15 @@ os.makedirs(output_dir, exist_ok=True)
 
 # Verify input file exists
 if not os.path.exists(input_parquet):
-    raise FileNotFoundError(f"Filtered parquet file not found at {input_parquet}. Please ensure the previous script has run.")
+    raise FileNotFoundError(
+        f"Filtered parquet file not found at {input_parquet}. Please ensure the previous script has run.")
 
 # Step 1: Check column existence and schema
 print(f"Starting processing at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 parquet_file = pq.ParquetFile(input_parquet)
 available_columns = parquet_file.schema.names
-required_columns = ['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit', 'measurement_name', 'created_at']
+required_columns = ['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit', 'measurement_name',
+                    'created_at']
 
 missing_cols = [col for col in required_columns if col not in available_columns]
 if missing_cols:
@@ -156,7 +159,8 @@ with tqdm(total=total_rows, desc="Processing parquet rows for groups", unit="row
             # Log sample combination rows (first 100)
             if combination_samples < 100:
                 sample_count = min(100 - combination_samples, len(df_combination))
-                print(f"Sample combination rows (batch {row_counter // batch_size + 1}):\n{df_combination[['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit', 'measurement_name']].head(sample_count)}")
+                print(
+                    f"Sample combination rows (batch {row_counter // batch_size + 1}):\n{df_combination[['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit', 'measurement_name']].head(sample_count)}")
                 combination_samples += sample_count
             # Group by combination
             group = df_combination.groupby(['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit'])
@@ -180,7 +184,8 @@ with tqdm(total=total_rows, desc="Processing parquet rows for groups", unit="row
             # Log sample missing rows (first 100)
             if missing_samples < 100:
                 sample_count = min(100 - missing_samples, len(df_missing))
-                print(f"Sample missing rows (batch {row_counter // batch_size + 1}):\n{df_missing[['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit', 'measurement_name']].head(sample_count)}")
+                print(
+                    f"Sample missing rows (batch {row_counter // batch_size + 1}):\n{df_missing[['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit', 'measurement_name']].head(sample_count)}")
                 missing_samples += sample_count
             # Group by measurement_name
             group = df_missing.groupby('measurement_name')
@@ -190,10 +195,14 @@ with tqdm(total=total_rows, desc="Processing parquet rows for groups", unit="row
                 if mname not in missing_mnames:
                     missing_mnames[mname] = {mname}
                 # Store mode of measurement_unit, measurement_type, lower_limit, upper_limit
-                unit_mode = group_df['measurement_unit'].mode().iloc[0] if not group_df['measurement_unit'].mode().empty else "unlabeled"
-                type_mode = group_df['measurement_type'].mode().iloc[0] if not group_df['measurement_type'].mode().empty else "unlabeled"
-                lower_mode = group_df['lower_limit'].mode().iloc[0] if not group_df['lower_limit'].mode().empty else -999.0
-                upper_mode = group_df['upper_limit'].mode().iloc[0] if not group_df['upper_limit'].mode().empty else -999.0
+                unit_mode = group_df['measurement_unit'].mode().iloc[0] if not group_df[
+                    'measurement_unit'].mode().empty else "unlabeled"
+                type_mode = group_df['measurement_type'].mode().iloc[0] if not group_df[
+                    'measurement_type'].mode().empty else "unlabeled"
+                lower_mode = group_df['lower_limit'].mode().iloc[0] if not group_df[
+                    'lower_limit'].mode().empty else -999.0
+                upper_mode = group_df['upper_limit'].mode().iloc[0] if not group_df[
+                    'upper_limit'].mode().empty else -999.0
                 missing_values_details[mname] = (unit_mode, type_mode, lower_mode, upper_mode)
                 # Count unique units and types per measurement_name
                 unit_count = group_df['measurement_unit'].nunique()
@@ -240,9 +249,12 @@ total_groups = len(combinations) + len(missing_groups)
 multi_unit_mnames = sum(1 for unit_count, _ in missing_multi_units_types.values() if unit_count > 1)
 multi_type_mnames = sum(1 for _, type_count in missing_multi_units_types.values() if type_count > 1)
 
-print(f"Step 2 Complete: Found {len(combinations)} combinations, {len(missing_groups)} missing value groups, {all_mnames_count} unique measurement names")
-print(f"Missing values: {multi_unit_mnames} measurement_names with multiple units, {multi_type_mnames} with multiple types")
-print(f"Overlapping measurement_names (in both combinations and missing_values): {', '.join(sorted(overlapping_mnames)) if overlapping_mnames else 'None'}")
+print(
+    f"Step 2 Complete: Found {len(combinations)} combinations, {len(missing_groups)} missing value groups, {all_mnames_count} unique measurement names")
+print(
+    f"Missing values: {multi_unit_mnames} measurement_names with multiple units, {multi_type_mnames} with multiple types")
+print(
+    f"Overlapping measurement_names (in both combinations and missing_values): {', '.join(sorted(overlapping_mnames)) if overlapping_mnames else 'None'}")
 
 # Step 3: Prepare primary summary CSV
 print("Step 3: Preparing primary summary CSV")
@@ -290,7 +302,8 @@ df_summary = pd.DataFrame(output_data)
 # Verify all rows are accounted for
 total_counted_rows = sum(row['row_count'] for row in output_data)
 total_percentage = sum(row['percentage'] for row in output_data)
-verification_status = "successful" if total_counted_rows == total_rows and abs(total_percentage - 100.0) < 0.01 else "failed"
+verification_status = "successful" if total_counted_rows == total_rows and abs(
+    total_percentage - 100.0) < 0.01 else "failed"
 
 # Description for primary CSV header
 unique_groups = [row['group_name'] for row in output_data]
@@ -410,7 +423,8 @@ with tqdm(total=total_rows, desc="Processing parquet rows for output", unit="row
             df_batch.loc[combination_mask, 'group_name'] = df_combination['group_name']
         # Missing values group
         missing_mask = (~has_lower | ~has_upper) | (~has_unit & ~has_type)
-        df_batch.loc[missing_mask, 'group_name'] = df_batch.loc[missing_mask, 'measurement_name'].fillna("unlabeled_measurement_name")
+        df_batch.loc[missing_mask, 'group_name'] = df_batch.loc[missing_mask, 'measurement_name'].fillna(
+            "unlabeled_measurement_name")
         # Convert lower_limit and upper_limit to strings to match input schema
         df_batch['lower_limit'] = df_batch['lower_limit'].astype(str).replace('nan', '')
         df_batch['upper_limit'] = df_batch['upper_limit'].astype(str).replace('nan', '')

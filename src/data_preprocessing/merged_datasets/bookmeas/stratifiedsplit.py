@@ -1,9 +1,12 @@
 # main.py
 
 import os
-import dask.dataframe as dd
 from pathlib import Path
+
+import dask.dataframe as dd
+
 from src.data_preprocessing.utils.stratifiedsplit_utility import stratified_split_and_save
+
 
 def main():
     """
@@ -37,6 +40,7 @@ def main():
         test_ratio=0.1,
         original_filename=original_filename
     )
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,8 @@
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 # Define paths
@@ -39,7 +40,8 @@ required_columns = ['booking_id', 'serial_number_id', 'teststep_id']
 missing_cols = [col for col in required_columns if col not in available_columns]
 if missing_cols:
     print(f"Error: Missing columns {missing_cols} in {parquet_file_path}. Available columns: {available_columns}")
-    print("Please confirm correct column names (e.g., 'teststep_id' or 'test_number_id', 'booking_id', 'serial_number_id').")
+    print(
+        "Please confirm correct column names (e.g., 'teststep_id' or 'test_number_id', 'booking_id', 'serial_number_id').")
     print("If 'booking_id' or 'serial_number_id' is in another Parquet file, a join may be needed.")
     exit(1)
 
@@ -54,25 +56,27 @@ booking_counts = {}
 serial_counts = {}
 
 with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar:
-    for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['booking_id', 'serial_number_id', 'teststep_id'], use_threads=True):
+    for batch in parquet_file.iter_batches(batch_size=batch_size,
+                                           columns=['booking_id', 'serial_number_id', 'teststep_id'], use_threads=True):
         df_batch = batch.to_pandas()
         # Replace null/NaN with "unlabeled"
         df_batch.fillna("unlabeled", inplace=True)
-        
+
         # Group by booking_id and count unique and total teststep_id, and occurrences
         booking_agg = df_batch.groupby('booking_id').agg({
             'teststep_id': ['nunique', 'count'],
             'serial_number_id': 'size'  # Count occurrences of booking_id
         }).reset_index()
         booking_agg.columns = ['booking_id', 'unique_teststep_id_count', 'total_teststep_id_count', 'booking_id_count']
-        
+
         # Group by serial_number_id and count unique and total teststep_id, and occurrences
         serial_agg = df_batch.groupby('serial_number_id').agg({
             'teststep_id': ['nunique', 'count'],
             'booking_id': 'size'  # Count occurrences of serial_number_id
         }).reset_index()
-        serial_agg.columns = ['serial_number_id', 'unique_teststep_id_count', 'total_teststep_id_count', 'serial_number_id_count']
-        
+        serial_agg.columns = ['serial_number_id', 'unique_teststep_id_count', 'total_teststep_id_count',
+                              'serial_number_id_count']
+
         # Update booking_counts
         for _, row in booking_agg.iterrows():
             booking_id = row['booking_id']
@@ -91,7 +95,7 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
                     'total_teststep_id_count': total_count,
                     'id_count': id_count
                 }
-        
+
         # Update serial_counts
         for _, row in serial_agg.iterrows():
             serial_id = row['serial_number_id']
@@ -110,13 +114,14 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
                     'total_teststep_id_count': total_count,
                     'id_count': id_count
                 }
-        
+
         pbar.update(len(df_batch))
         del df_batch
         del booking_agg
         del serial_agg
 
-print(f"Step 2 Complete: Found {len(booking_counts)} unique booking_id values and {len(serial_counts)} unique serial_number_id values")
+print(
+    f"Step 2 Complete: Found {len(booking_counts)} unique booking_id values and {len(serial_counts)} unique serial_number_id values")
 
 # Step 3: Prepare output data
 print("Step 3: Preparing output data")
@@ -161,7 +166,8 @@ print(f"Step 4 Complete: CSV saved as {output_csv}")
 print("Step 5: Verifying processed rows")
 processed_rows = 0
 with tqdm(total=total_rows, desc="Verifying rows", unit="rows") as pbar:
-    for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['booking_id', 'serial_number_id'], use_threads=True):
+    for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['booking_id', 'serial_number_id'],
+                                           use_threads=True):
         df_batch = batch.to_pandas()
         processed_rows += len(df_batch)
         pbar.update(len(df_batch))

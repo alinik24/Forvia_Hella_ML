@@ -1,10 +1,11 @@
 # This script scans the `measurements_single_line.parquet` file to extract all rows where the `measure_value` column is missing (NaN).
 # It processes the file in memory-efficient batches, appends any matching rows to a list, and combines them into a single DataFrame.
 # The resulting set of rows with missing `measure_value` is saved to a timestamped CSV file for further inspection or cleaning.
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 
 # Define paths
 base_path = r"C:\Desktop\Research and Thesis\RWML projects\data_hella_single_line"
@@ -30,7 +31,8 @@ for batch in parquet_file.iter_batches(batch_size=batch_size):
     del df_batch  # Free memory
 
 # Combine all missing rows into a single DataFrame
-missing_rows_df = pd.concat(missing_rows, ignore_index=True) if missing_rows else pd.DataFrame(columns=parquet_file.schema.names)
+missing_rows_df = pd.concat(missing_rows, ignore_index=True) if missing_rows else pd.DataFrame(
+    columns=parquet_file.schema.names)
 
 print(f"Found {len(missing_rows_df)} rows with missing measure_value")
 

@@ -1,7 +1,8 @@
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 # Define paths
@@ -31,7 +32,8 @@ if missing_cols:
     exit(1)
 
 # Step 2: Collect unique combinations and standalone unique values
-print("Step 2: Collecting unique combinations and standalone values for product_id, product_variant_id, and part_number")
+print(
+    "Step 2: Collecting unique combinations and standalone values for product_id, product_variant_id, and part_number")
 total_rows = parquet_file.metadata.num_rows
 batch_size = 2000000  # Optimized batch size for performance
 
@@ -46,17 +48,17 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
         df_batch = batch.to_pandas()
         # Replace null/NaN values with placeholders
         df_batch.fillna("unlabeled", inplace=True)
-        
+
         # Extract unique combinations
         combinations = df_batch[['product_id', 'product_variant_id', 'part_number']].drop_duplicates()
         for row in combinations.itertuples(index=False):
             unique_combinations.add((row.product_id, row.product_variant_id, row.part_number))
-        
+
         # Extract unique standalone values
         unique_product_ids.update(df_batch['product_id'].unique())
         unique_product_variant_ids.update(df_batch['product_variant_id'].unique())
         unique_part_numbers.update(df_batch['part_number'].unique())
-        
+
         pbar.update(len(df_batch))
         # Free memory
         del df_batch

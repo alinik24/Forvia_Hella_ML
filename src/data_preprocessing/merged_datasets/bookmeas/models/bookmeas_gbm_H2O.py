@@ -1,11 +1,15 @@
-import h2o
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+import h2o
 from src.data_preprocessing.config import save_last_run
 from src.data_preprocessing.utils.load_paths import load_last_run
 from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import plot_feature_importance
 from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import train_gbm_model
+
+from src.data_preprocessing.utils.model_utils.h2o_utils import (
+    initialize_h2o_cluster,
+)
 
 
 def an():
@@ -53,7 +57,8 @@ def an():
 
 
 def main():
-    h2o.init(ip="localhost", port="8080", max_mem_size_GB=24)
+    initialize_h2o_cluster(max_mem_gb=14, max_retries=5)
+    #h2o.init(ip="localhost", port="8080", max_mem_size_GB=24)
     h2o.demo("glm")
 
 

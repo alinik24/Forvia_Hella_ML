@@ -1,9 +1,10 @@
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
-from tqdm import tqdm
+
+import pandas as pd
 import pyarrow as pa
+import pyarrow.parquet as pq
+from tqdm import tqdm
 
 # Define paths
 base_path = r"C:\Desktop\Research and Thesis\RWML projects\data_hella_single_line"
@@ -28,7 +29,8 @@ labeled_station_desc = [
     'station b17ad0f9', 'station 5a3f0928', 'station 031c4441', 'station 14473147', 'station eef8a574',
     'station 9a991014', 'station 0bde46ac', 'station 4b1b68dd', 'station 507926e9', 'station c06ba294',
     'station e40d07f7', 'station 0d84218d', 'station 94ff9bdd', 'station a24958aa', 'station 0883123a',
-    'station b94b00ce', 'station 8ce235cf', 'station 63afba48', 'station bc01f8be', 'station d6806593', 'station de579af6'
+    'station b94b00ce', 'station 8ce235cf', 'station 63afba48', 'station bc01f8be', 'station d6806593',
+    'station de579af6'
 ]
 
 # Verify file existence
@@ -38,6 +40,7 @@ for file_path in [measurements_file, bookings_file]:
 
 # Initialize batch size
 batch_size = 2000000
+
 
 # Function to process a parquet file and generate filtered parquet
 def process_file(file_path, file_type, time_column):
@@ -95,11 +98,13 @@ def process_file(file_path, file_type, time_column):
                     batch_filtered_max = non_labeled_batch[time_column].max()
                     if batch_filtered_min and (filtered_min_time is None or batch_filtered_min < filtered_min_time):
                         filtered_min_time = batch_filtered_min
-                        filtered_min_time_row = non_labeled_batch[non_labeled_batch[time_column] == batch_filtered_min].iloc[0].to_dict()
+                        filtered_min_time_row = \
+                        non_labeled_batch[non_labeled_batch[time_column] == batch_filtered_min].iloc[0].to_dict()
                         filtered_min_time_row_number = batch_indices[non_labeled_batch[time_column].idxmin()]
                     if batch_filtered_max and (filtered_max_time is None or batch_filtered_max > filtered_max_time):
                         filtered_max_time = batch_filtered_max
-                        filtered_max_time_row = non_labeled_batch[non_labeled_batch[time_column] == batch_filtered_max].iloc[0].to_dict()
+                        filtered_max_time_row = \
+                        non_labeled_batch[non_labeled_batch[time_column] == batch_filtered_max].iloc[0].to_dict()
                         filtered_max_time_row_number = batch_indices[non_labeled_batch[time_column].idxmax()]
 
             # Process station_desc metrics
@@ -142,8 +147,10 @@ def process_file(file_path, file_type, time_column):
 
     # Finalize unique row counts
     for station in station_desc_metrics:
-        station_desc_metrics[station]['original_unique_rows'] = len(station_desc_metrics[station]['original_unique_rows'])
-        station_desc_metrics[station]['filtered_unique_rows'] = len(station_desc_metrics[station]['filtered_unique_rows'])
+        station_desc_metrics[station]['original_unique_rows'] = len(
+            station_desc_metrics[station]['original_unique_rows'])
+        station_desc_metrics[station]['filtered_unique_rows'] = len(
+            station_desc_metrics[station]['filtered_unique_rows'])
 
     return {
         'total_rows': total_rows,
@@ -163,6 +170,7 @@ def process_file(file_path, file_type, time_column):
         'filtered_max_time_row_number': filtered_max_time_row_number
     }
 
+
 # Function to collect unique IDs
 def collect_unique_ids(file_path, file_type):
     parquet_file = pq.ParquetFile(file_path)
@@ -173,7 +181,8 @@ def collect_unique_ids(file_path, file_type):
     unique_booking_ids = set()
 
     with tqdm(total=total_rows, desc=f"Processing {file_type} rows for IDs", unit="rows") as pbar:
-        for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['serial_number_id', 'booking_id'], use_threads=True):
+        for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['serial_number_id', 'booking_id'],
+                                               use_threads=True):
             df_batch = batch.to_pandas()
             df_batch = df_batch.fillna("")
 
@@ -185,6 +194,7 @@ def collect_unique_ids(file_path, file_type):
 
     return unique_serial_ids, unique_booking_ids
 
+
 # Process files
 measurements_results = process_file(measurements_file, "measurements", "created_at")
 bookings_results = process_file(bookings_file, "bookings", "book_stamp")
@@ -193,14 +203,16 @@ bookings_results = process_file(bookings_file, "bookings", "book_stamp")
 bookings_serial_ids, bookings_booking_ids = collect_unique_ids(bookings_file, "bookings")
 measurements_serial_ids, measurements_booking_ids = collect_unique_ids(measurements_file, "measurements")
 
+
 # Prepare summary CSV
 def prepare_summary_csv(results, file_type, summary_csv_path):
     output_data = []
     total_rows = results['total_rows']
     non_labeled_rows = results['non_labeled_rows']
     unique_station_desc = sorted(results['station_desc_metrics'].keys())
-    first_rows_info = "\n".join([f"# station_desc: {station}\n# First Row: {results['station_desc_metrics'][station]['first_row']}" 
-                                for station in unique_station_desc if results['station_desc_metrics'][station]['first_row']])
+    first_rows_info = "\n".join(
+        [f"# station_desc: {station}\n# First Row: {results['station_desc_metrics'][station]['first_row']}"
+         for station in unique_station_desc if results['station_desc_metrics'][station]['first_row']])
 
     # Add labeled section header
     output_data.append({
@@ -286,6 +298,7 @@ def prepare_summary_csv(results, file_type, summary_csv_path):
         f.write(description)
         df_output.to_csv(f, index=False, lineterminator='\n')
 
+
 # Prepare unique IDs CSV
 def prepare_unique_ids_csv(unique_serial_ids, unique_booking_ids, file_type, unique_ids_csv_path):
     output_data = []
@@ -325,6 +338,7 @@ def prepare_unique_ids_csv(unique_serial_ids, unique_booking_ids, file_type, uni
     with open(unique_ids_csv_path, 'w', encoding='utf-8') as f:
         f.write(description)
         df_output.to_csv(f, index=False, lineterminator='\n')
+
 
 # Generate outputs
 prepare_summary_csv(measurements_results, "measurements", measurements_summary_csv)

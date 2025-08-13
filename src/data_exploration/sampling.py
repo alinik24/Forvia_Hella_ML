@@ -33,12 +33,14 @@ Output:
 
 Designed for high-volume SMT or production line traceability datasets.
 """
-import pandas as pd
-import pyarrow.parquet as pq
 import os
 import random
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 from tqdm import tqdm
+
 
 def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, chunk_size=10000):
     """
@@ -105,21 +107,26 @@ def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, c
 
     # Ensure there are enough serial numbers to sample
     if len(all_serial_numbers) < num_serial_ids:
-        raise ValueError(f"Not enough unique serial_number_id values in bookings file. Found {len(all_serial_numbers)}, required {num_serial_ids}.")
+        raise ValueError(
+            f"Not enough unique serial_number_id values in bookings file. Found {len(all_serial_numbers)}, required {num_serial_ids}.")
     random_serial_numbers = random.sample(list(all_serial_numbers), num_serial_ids)
     print(f"Step 2 Complete: Selected {len(random_serial_numbers)} serial_number_id values")
 
     # Step 3: Collect all rows for each serial number ID in chunks
-    all_columns = ["Parquet_file", "serial_number_id"] + bookings_columns + measurements_columns + materials_columns + ["duplicate_count"]
+    all_columns = ["Parquet_file", "serial_number_id"] + bookings_columns + measurements_columns + materials_columns + [
+        "duplicate_count"]
     detailed_parquet = f"{output_prefix}_detailed.parquet"
     summary = {}
     duplicates = []
 
     # Split serial numbers into chunks
-    serial_number_chunks = [random_serial_numbers[i:i + chunk_size] for i in range(0, len(random_serial_numbers), chunk_size)]
+    serial_number_chunks = [random_serial_numbers[i:i + chunk_size] for i in
+                            range(0, len(random_serial_numbers), chunk_size)]
 
-    for chunk_idx, serial_chunk in enumerate(tqdm(serial_number_chunks, desc="Processing serial number chunks", unit="chunk")):
-        print(f"Step 3: Processing chunk {chunk_idx + 1}/{len(serial_number_chunks)} ({len(serial_chunk)} serial numbers)")
+    for chunk_idx, serial_chunk in enumerate(
+            tqdm(serial_number_chunks, desc="Processing serial number chunks", unit="chunk")):
+        print(
+            f"Step 3: Processing chunk {chunk_idx + 1}/{len(serial_number_chunks)} ({len(serial_chunk)} serial numbers)")
 
         # Initialize data structures for this chunk
         bookings_data = []
@@ -167,6 +174,7 @@ def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, c
 
         # Step 4: Deduplicate within each DataFrame and count duplicates
         print(f"Step 4: Deduplicating data and counting duplicates for chunk {chunk_idx + 1}")
+
         def deduplicate_and_count(df, file_name):
             if df.empty:
                 return df, {}
@@ -183,11 +191,15 @@ def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, c
 
         # Collect duplicates for this chunk
         if not bookings_df_dedup.empty and len(bookings_df) > len(bookings_df_dedup):
-            duplicates.extend(bookings_df[bookings_df.duplicated(keep=False)].assign(source_file="bookings").to_dict('records'))
+            duplicates.extend(
+                bookings_df[bookings_df.duplicated(keep=False)].assign(source_file="bookings").to_dict('records'))
         if not measurements_df_dedup.empty and len(measurements_df) > len(measurements_df_dedup):
-            duplicates.extend(measurements_df[measurements_df.duplicated(keep=False)].assign(source_file="measurements").to_dict('records'))
+            duplicates.extend(
+                measurements_df[measurements_df.duplicated(keep=False)].assign(source_file="measurements").to_dict(
+                    'records'))
         if not materials_df_dedup.empty and len(materials_df) > len(materials_df_dedup):
-            duplicates.extend(materials_df[materials_df.duplicated(keep=False)].assign(source_file="materials").to_dict('records'))
+            duplicates.extend(
+                materials_df[materials_df.duplicated(keep=False)].assign(source_file="materials").to_dict('records'))
 
         # Step 5: Prepare detailed output for this chunk
         print(f"Step 5: Preparing detailed Parquet for chunk {chunk_idx + 1}")
@@ -209,11 +221,11 @@ def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, c
             bookings_rows = bookings_df_dedup[bookings_df_dedup['serial_number_id'] == sn]
             for _, row in bookings_rows.iterrows():
                 output_rows.append(create_row("bookings", sn, row, bookings_columns, bookings_dup_counts))
-            
+
             measurements_rows = measurements_df_dedup[measurements_df_dedup['serial_number_id'] == sn]
             for _, row in measurements_rows.iterrows():
                 output_rows.append(create_row("measurements", sn, row, measurements_columns, measurements_dup_counts))
-            
+
             materials_rows = materials_df_dedup[materials_df_dedup['serial_number_id'] == sn]
             for _, row in materials_rows.iterrows():
                 output_rows.append(create_row("materials", sn, row, materials_columns, materials_dup_counts))
@@ -253,12 +265,13 @@ def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, c
         grouped_duplicates = duplicates_df.groupby(['serial_number_id', 'source_file'])
         duplicates_summary = [("|".join(all_columns[:-1]))]  # Header without duplicate_count
         for (sn, source_file), group in tqdm(grouped_duplicates, desc="Writing duplicates", unit="group"):
-            duplicates_summary.append(f"Serial Number ID: {sn}, Source File: {source_file}, Duplicate Rows: {len(group)}")
+            duplicates_summary.append(
+                f"Serial Number ID: {sn}, Source File: {source_file}, Duplicate Rows: {len(group)}")
             for _, row in group.iterrows():
                 row_dict = row.drop('source_file').to_dict()
-                duplicates_summary.append(create_row(source_file, sn, row_dict, 
-                                                     bookings_columns if source_file == "bookings" else 
-                                                     measurements_columns if source_file == "measurements" else materials_columns, 
+                duplicates_summary.append(create_row(source_file, sn, row_dict,
+                                                     bookings_columns if source_file == "bookings" else
+                                                     measurements_columns if source_file == "measurements" else materials_columns,
                                                      {}, return_string=True))
             duplicates_summary.append("")  # Empty line for readability
         with open(duplicates_csv, 'w', encoding='utf-8') as f:
@@ -272,6 +285,7 @@ def process_data_with_timespan(base_path, timestamp_str, num_serial_ids=10000, c
     print(f"- Detailed: {detailed_parquet}")
     print(f"- Summary: {summary_csv}")
     print(f"- Duplicates: {duplicates_csv}")
+
 
 # Example usage with current date and time
 base_path = r"C:\Desktop\Research and Thesis\RWML projects\data_hella_single_line"

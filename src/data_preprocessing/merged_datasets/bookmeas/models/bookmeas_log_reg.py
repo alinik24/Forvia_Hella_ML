@@ -39,12 +39,12 @@ def main():
         y,
         test_size=0.2,
         random_state=42,
-        stratify=y              # Maintain class distribution
+        stratify=y  # Maintain class distribution
     )
 
     # Run logistic regression with the scaled features
     print("Running logistic regression model...")
-    #best_model = run_logistic_regression_gridsearch(X_train, y_train, X_test, y_test)
+    # best_model = run_logistic_regression_gridsearch(X_train, y_train, X_test, y_test)
     best_model = run_logistic_regression(X_train, y_train, X_test, y_test)
 
     # Plot coefficients for each class

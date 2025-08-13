@@ -1,10 +1,10 @@
 # This script extracts all unique `teststep_id` values from the `measurements_single_line.parquet` file. It reads the data in
 # memory-efficient batches, filters out nulls, and collects distinct IDs into a set. The final list of unique `teststep_id`s
 # is saved to a timestamped CSV file, providing a compact reference for downstream tasks such as single_datasets, mapping, or analysis.
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 # Define paths

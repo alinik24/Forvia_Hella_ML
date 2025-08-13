@@ -3,10 +3,11 @@
 # to optimize performance, replaces missing values with a placeholder, and aggregates the statistics using group-by operations. The results
 # are saved to a timestamped CSV file with a multi-level column header and verified to ensure that the row count matches the total number
 # of rows in the original file.
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 # Define paths
@@ -39,19 +40,20 @@ batch_size = 2000000  # Optimized batch size
 serial_counts = {}
 
 with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar:
-    for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['serial_number_id'] + columns, use_threads=True):
+    for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['serial_number_id'] + columns,
+                                           use_threads=True):
         df_batch = batch.to_pandas()
         # Replace null/NaN values
         df_batch.fillna("unlabeled", inplace=True)
-        
+
         # Group by serial_number_id
         agg = df_batch.groupby('serial_number_id').agg({
             col: ['nunique', 'count'] for col in columns
         })
-        
+
         # Flatten multi-level column names
         agg.columns = [f"{col}_{stat}" for col, stat in agg.columns]
-        
+
         # Update serial_counts
         for serial, row in agg.iterrows():
             if serial not in serial_counts:
@@ -59,7 +61,7 @@ with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar
             for col in columns:
                 serial_counts[serial][f"unique_{col}_count"] = row[f"{col}_nunique"]
                 serial_counts[serial][f"total_{col}_count"] = row[f"{col}_count"]
-        
+
         pbar.update(len(df_batch))
         del df_batch
         del agg
@@ -105,6 +107,7 @@ print(f"Total rows in file: {total_rows}")
 if total_counted_rows == total_rows:
     print("Verification successful: All rows accounted for.")
 else:
-    print(f"Verification failed: Sum of total booking_id counts ({total_counted_rows}) does not match total rows ({total_rows}).")
+    print(
+        f"Verification failed: Sum of total booking_id counts ({total_counted_rows}) does not match total rows ({total_rows}).")
 
 print(f"Processing complete at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

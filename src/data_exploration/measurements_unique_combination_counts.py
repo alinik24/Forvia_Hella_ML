@@ -1,7 +1,8 @@
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 # Define paths
@@ -39,7 +40,8 @@ required_columns = ['measurement_unit', 'measurement_type', 'lower_limit', 'uppe
 missing_cols = [col for col in required_columns if col not in available_columns]
 if missing_cols:
     print(f"Error: Missing columns {missing_cols} in {measurements_file}. Available columns: {available_columns}")
-    print("Please confirm correct column names (e.g., 'measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit').")
+    print(
+        "Please confirm correct column names (e.g., 'measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit').")
     exit(1)
 
 # Step 2: Collect unique combinations
@@ -50,7 +52,9 @@ batch_size = 100000  # Smaller batch size to reduce memory usage (100k rows per 
 
 combinations = {}
 with tqdm(total=total_rows, desc="Processing Parquet rows", unit="rows") as pbar:
-    for batch in parquet_file.iter_batches(batch_size=batch_size, columns=['measurement_unit', 'measurement_type', 'lower_limit', 'upper_limit'], use_threads=True):
+    for batch in parquet_file.iter_batches(batch_size=batch_size,
+                                           columns=['measurement_unit', 'measurement_type', 'lower_limit',
+                                                    'upper_limit'], use_threads=True):
         df_batch = batch.to_pandas()
         # Replace null/NaN values with placeholders to ensure they are included in grouping
         df_batch['measurement_unit'] = df_batch['measurement_unit'].fillna("unlabeled")
@@ -109,6 +113,7 @@ print(f"Sum of percentages: {total_percentage:.2f}%")
 if total_counted_rows == total_rows and abs(total_percentage - 100.0) < 0.01:  # Allow for floating-point precision
     print("Verification successful: All rows and percentages are accounted for.")
 else:
-    print(f"Verification failed: Sum of row counts ({total_counted_rows}) does not match total rows ({total_rows}), or sum of percentages ({total_percentage:.2f}%) deviates from 100%.")
+    print(
+        f"Verification failed: Sum of row counts ({total_counted_rows}) does not match total rows ({total_rows}), or sum of percentages ({total_percentage:.2f}%) deviates from 100%.")
 
 print(f"Processing complete at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

@@ -1,9 +1,10 @@
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
-from tqdm import tqdm
+
+import pandas as pd
 import pyarrow as pa
+import pyarrow.parquet as pq
+from tqdm import tqdm
 
 # Define paths
 measurements_file = r"C:\Desktop\Research and Thesis\RWML projects\data_hella\output\measurements_non_labeled.parquet"
@@ -27,6 +28,7 @@ for file_path in [measurements_file, bookings_file]:
 # Initialize batch size
 batch_size = 2000000
 
+
 # Function to count total rows
 def count_rows(file_path, file_type):
     parquet_file = pq.ParquetFile(file_path)
@@ -34,35 +36,37 @@ def count_rows(file_path, file_type):
     print(f"Total rows in {file_type} file: {total_rows}")
     return total_rows
 
+
 # Count rows in both files
 measurements_total_rows = count_rows(measurements_file, "measurements")
 bookings_total_rows = count_rows(bookings_file, "bookings")
+
 
 # Function to perform left join and track unmatched rows
 def perform_left_join(measurements_path, bookings_path):
     measurements_parquet = pq.ParquetFile(measurements_path)
     bookings_parquet = pq.ParquetFile(bookings_path)
-    
+
     # Initialize result lists
     timestamp_comparison_data = []
     joined_row_count = 0
     unmatched_measurements_count = 0
     unmatched_bookings_count = 0
     unmatched_measurements_rows = []
-    
+
     # Get schemas
     measurements_schema = measurements_parquet.schema_arrow
     bookings_schema = bookings_parquet.schema_arrow
-    
+
     # Create combined schema: all measurements columns + all bookings columns with _b suffix (except join keys)
     combined_fields = measurements_schema
     for field in bookings_schema:
         if field.name not in ['serial_number_id', 'booking_id']:
             combined_fields = combined_fields.append(pa.field(f"{field.name}_b", field.type))
-    
+
     # Initialize writer for joined output
     joined_writer = pq.ParquetWriter(result_file, combined_fields, compression='snappy')
-    
+
     # Track earliest and latest dates
     earliest_measurements = {'time': None, 'row': None, 'row_number': None}
     latest_measurements = {'time': None, 'row': None, 'row_number': None}
@@ -71,21 +75,22 @@ def perform_left_join(measurements_path, bookings_path):
     earliest_joined = {'time': None, 'row': None, 'row_number': None}
     latest_joined = {'time': None, 'row': None, 'row_number': None}
     row_counter = 0
-    
+
     # Load bookings into memory, renaming non-join columns with _b suffix
     bookings_df = pd.read_parquet(bookings_path)
-    bookings_df = bookings_df.rename(columns={col: f"{col}_b" for col in bookings_df.columns if col not in ['serial_number_id', 'booking_id']})
+    bookings_df = bookings_df.rename(
+        columns={col: f"{col}_b" for col in bookings_df.columns if col not in ['serial_number_id', 'booking_id']})
     bookings_df = bookings_df.set_index(['serial_number_id', 'booking_id'])
-    
+
     # Track matched booking indices for unmatched bookings
     matched_booking_indices = set()
-    
+
     with tqdm(total=measurements_total_rows, desc="Processing measurements for join", unit="rows") as pbar:
         for batch in measurements_parquet.iter_batches(batch_size=batch_size, use_threads=True):
             df_batch = batch.to_pandas()
             batch_row_count = len(df_batch)
             batch_indices = range(row_counter, row_counter + batch_row_count)
-            
+
             # Update earliest and latest measurements time
             if 'created_at' in df_batch.columns:
                 batch_min = df_batch['created_at'].min()
@@ -98,18 +103,18 @@ def perform_left_join(measurements_path, bookings_path):
                     latest_measurements['time'] = batch_max
                     latest_measurements['row'] = df_batch[df_batch['created_at'] == batch_max].iloc[0].to_dict()
                     latest_measurements['row_number'] = batch_indices[df_batch['created_at'].idxmax()]
-            
+
             # Perform join
             df_batch_indexed = df_batch.set_index(['serial_number_id', 'booking_id'])
             joined_batch = df_batch_indexed.join(bookings_df, how='left')
-            
+
             # Separate matched and unmatched
             matched = joined_batch[joined_batch.index.isin(bookings_df.index)]
             unmatched = joined_batch[~joined_batch.index.isin(bookings_df.index)]
-            
+
             # Track matched booking indices
             matched_booking_indices.update(matched.index)
-            
+
             # Collect timestamp comparison for matched rows
             if not matched.empty and 'created_at' in matched.columns and 'book_stamp_b' in matched.columns:
                 for idx, row in matched.iterrows():
@@ -119,21 +124,22 @@ def perform_left_join(measurements_path, bookings_path):
                         'created_at': row['created_at'],
                         'book_stamp': row['book_stamp_b']
                     })
-            
+
             # Reset index for writing
             matched = matched.reset_index()
             unmatched = unmatched.reset_index()
-            
+
             # Write matched rows
             if not matched.empty:
                 joined_writer.write_table(pa.Table.from_pandas(matched, schema=combined_fields))
                 joined_row_count += len(matched)
-                
+
                 # Update earliest and latest joined time
                 if 'created_at' in matched.columns:
                     batch_joined_min = matched['created_at'].min()
                     batch_joined_max = matched['created_at'].max()
-                    if batch_joined_min and (earliest_joined['time'] is None or batch_joined_min < earliest_joined['time']):
+                    if batch_joined_min and (
+                            earliest_joined['time'] is None or batch_joined_min < earliest_joined['time']):
                         earliest_joined['time'] = batch_joined_min
                         earliest_joined['row'] = matched[matched['created_at'] == batch_joined_min].iloc[0].to_dict()
                         earliest_joined['row_number'] = batch_indices[matched['created_at'].idxmin()]
@@ -141,45 +147,51 @@ def perform_left_join(measurements_path, bookings_path):
                         latest_joined['time'] = batch_joined_max
                         latest_joined['row'] = matched[matched['created_at'] == batch_joined_max].iloc[0].to_dict()
                         latest_joined['row_number'] = batch_indices[matched['created_at'].idxmax()]
-            
+
             # Collect unmatched measurements rows
             if not unmatched.empty:
                 unmatched_measurements_rows.append(unmatched.reset_index())
                 unmatched_measurements_count += len(unmatched)
-            
+
             row_counter += batch_row_count
             pbar.update(batch_row_count)
             del df_batch, joined_batch, matched, unmatched
-    
+
     joined_writer.close()
-    
+
     # Write unmatched measurements to CSV
     if unmatched_measurements_rows:
         unmatched_measurements_df = pd.concat(unmatched_measurements_rows, ignore_index=True)
         unmatched_measurements_df.to_csv(unmatched_measurements_csv, index=False, lineterminator='\n')
         del unmatched_measurements_df
-    
+
     # Write unmatched bookings to CSV
     unmatched_bookings = bookings_df[~bookings_df.index.isin(matched_booking_indices)]
     unmatched_bookings_count = len(unmatched_bookings)
     if not unmatched_bookings.empty:
         unmatched_bookings = unmatched_bookings.reset_index()
         unmatched_bookings.to_csv(unmatched_bookings_csv, index=False, lineterminator='\n')
-    
+
     # Get earliest and latest bookings time
     bookings_full_df = pd.read_parquet(bookings_path)  # Load full bookings for timestamp analysis
     if 'book_stamp' in bookings_full_df.columns:
         earliest_bookings['time'] = bookings_full_df['book_stamp'].min()
-        earliest_bookings['row'] = bookings_full_df[bookings_full_df['book_stamp'] == earliest_bookings['time']].iloc[0].to_dict()
-        earliest_bookings['row_number'] = bookings_full_df.index.get_loc(bookings_full_df[bookings_full_df['book_stamp'] == earliest_bookings['time']].index[0])
+        earliest_bookings['row'] = bookings_full_df[bookings_full_df['book_stamp'] == earliest_bookings['time']].iloc[
+            0].to_dict()
+        earliest_bookings['row_number'] = bookings_full_df.index.get_loc(
+            bookings_full_df[bookings_full_df['book_stamp'] == earliest_bookings['time']].index[0])
         latest_bookings['time'] = bookings_full_df['book_stamp'].max()
-        latest_bookings['row'] = bookings_full_df[bookings_full_df['book_stamp'] == latest_bookings['time']].iloc[0].to_dict()
-        latest_bookings['row_number'] = bookings_full_df.index.get_loc(bookings_full_df[bookings_full_df['book_stamp'] == latest_bookings['time']].index[0])
-    
+        latest_bookings['row'] = bookings_full_df[bookings_full_df['book_stamp'] == latest_bookings['time']].iloc[
+            0].to_dict()
+        latest_bookings['row_number'] = bookings_full_df.index.get_loc(
+            bookings_full_df[bookings_full_df['book_stamp'] == latest_bookings['time']].index[0])
+
     return joined_row_count, unmatched_measurements_count, unmatched_bookings_count, earliest_measurements, latest_measurements, earliest_bookings, latest_bookings, earliest_joined, latest_joined, timestamp_comparison_data
 
+
 # Perform join
-joined_count, unmatched_measurements_count, unmatched_bookings_count, earliest_measurements, latest_measurements, earliest_bookings, latest_bookings, earliest_joined, latest_joined, timestamp_comparison_data = perform_left_join(measurements_file, bookings_file)
+joined_count, unmatched_measurements_count, unmatched_bookings_count, earliest_measurements, latest_measurements, earliest_bookings, latest_bookings, earliest_joined, latest_joined, timestamp_comparison_data = perform_left_join(
+    measurements_file, bookings_file)
 
 # Get 5 rows from result file
 result_peek = pd.read_parquet(result_file, engine='pyarrow').head(5).to_dict('records')
@@ -223,11 +235,14 @@ summary_data = {
         unmatched_measurements_count,
         unmatched_bookings_count,
         earliest_measurements['time'],
-        f"{earliest_measurements['row_number']}/{measurements_total_rows}" if earliest_measurements['row_number'] is not None else None,
+        f"{earliest_measurements['row_number']}/{measurements_total_rows}" if earliest_measurements[
+                                                                                  'row_number'] is not None else None,
         latest_measurements['time'],
-        f"{latest_measurements['row_number']}/{measurements_total_rows}" if latest_measurements['row_number'] is not None else None,
+        f"{latest_measurements['row_number']}/{measurements_total_rows}" if latest_measurements[
+                                                                                'row_number'] is not None else None,
         earliest_bookings['time'],
-        f"{earliest_bookings['row_number']}/{bookings_total_rows}" if earliest_bookings['row_number'] is not None else None,
+        f"{earliest_bookings['row_number']}/{bookings_total_rows}" if earliest_bookings[
+                                                                          'row_number'] is not None else None,
         latest_bookings['time'],
         f"{latest_bookings['row_number']}/{bookings_total_rows}" if latest_bookings['row_number'] is not None else None,
         earliest_joined['time'],

@@ -1,7 +1,8 @@
-import pyarrow.parquet as pq
-import pandas as pd
 import os
 from datetime import datetime
+
+import pandas as pd
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 # Define paths
@@ -22,12 +23,14 @@ if not os.path.exists(measurements_file):
 print(f"Starting processing at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 parquet_file = pq.ParquetFile(measurements_file)
 available_columns = parquet_file.schema.names
-required_columns = ['serial_number_id', 'catalog_id', 'recipe_revision_id', 'station_id', 'station_number', 'workstep_id']
+required_columns = ['serial_number_id', 'catalog_id', 'recipe_revision_id', 'station_id', 'station_number',
+                    'workstep_id']
 
 missing_cols = [col for col in required_columns if col not in available_columns]
 if missing_cols:
     print(f"Error: Missing columns {missing_cols} in {measurements_file}. Available columns: {available_columns}")
-    print("Please confirm correct column names (e.g., 'serial_number_id', 'catalog_id', 'recipe_revision_id', 'station_id', 'station_number', 'workstep_id').")
+    print(
+        "Please confirm correct column names (e.g., 'serial_number_id', 'catalog_id', 'recipe_revision_id', 'station_id', 'station_number', 'workstep_id').")
     exit(1)
 
 # Step 2: Collect unique values and counts per serial_number_id and total unique values

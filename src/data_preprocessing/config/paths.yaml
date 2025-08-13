@@ -1,6 +1,9 @@
 last_run:
-  input_path: C:\Desktop\Research and Thesis\RWML projects\data\high_book_state_2\4_week\bookmeas_4_week_anonym.parquet
-  output_path: C:\Desktop\Research and Thesis\RWML projects\Forvia_Project\Forvia_Project\data\output
-  timestamp: '2025-08-11 04:30:16'
+  input_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
+    output\\bookmeas\\bookmeas_b_e_2025-03-01_to_2025-03-11.parquet"
+  output_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
+    output\\bookmeas\\bookmeas_b_e_2025-03-01_to_2025-03-11_filtered.parquet"
+  timestamp: '2025-08-11 13:00:57'
   version: v1
-  run_at: C:\Desktop\Research and Thesis\RWML projects\Forvia_Project\Forvia_Project
+  run_at: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Code\\src\\\
+    data_preprocessing\\merged_datasets\\bookmeas"

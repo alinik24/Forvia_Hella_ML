@@ -1,9 +1,9 @@
-import pandas as pd
-import pyarrow.parquet as pq
-import pyarrow as pa
-import os
-from pathlib import Path
 import gc
+import os
+
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 # Define file paths
 data_path = r"C:\Desktop\Research and Thesis\RWML projects\data_hella_single_line"
@@ -89,7 +89,8 @@ if os.path.exists(output_parquet):
 os.rename(output_parquet + ".temp", output_parquet)
 
 # Calculate unjoined rows
-measurements_joined = merged_rows - bookings[bookings['serial_number_id'].isin(measurements['serial_number_id'])].shape[0]
+measurements_joined = merged_rows - bookings[bookings['serial_number_id'].isin(measurements['serial_number_id'])].shape[
+    0]
 measurements_unjoined = measurements_rows - measurements_joined
 materials_joined = merged_rows - bookings[bookings['serial_number_id'].isin(materials['serial_number_id'])].shape[0]
 materials_unjoined = materials_rows - materials_joined
@@ -115,7 +116,8 @@ summary = {
         measurements_unjoined,
         materials_rows,
         materials_unjoined,
-        len(bookings_columns) + len(measurements_columns) + len(materials_columns) - 2  # Subtract 2 for shared join keys
+        len(bookings_columns) + len(measurements_columns) + len(materials_columns) - 2
+        # Subtract 2 for shared join keys
     ]
 }
 
@@ -134,7 +136,7 @@ summary_df = pd.concat([summary_df, missing_df], ignore_index=True)
 # Add preview rows
 preview_df = pd.DataFrame(preview_rows)
 if not preview_df.empty:
-    preview_df.insert(0, "Metric", [f"Preview row {i+1}" for i in range(len(preview_df))])
+    preview_df.insert(0, "Metric", [f"Preview row {i + 1}" for i in range(len(preview_df))])
     summary_df = pd.concat([summary_df, preview_df], ignore_index=True)
 
 # Save summary to CSV
