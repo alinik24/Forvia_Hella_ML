@@ -101,6 +101,7 @@ def analyze_missingness(df):
 
 def drop_highly_correlated_columns_pandas(df: pd.DataFrame, threshold: float = 0.99,
                                           sample_size: int = 10000) -> pd.DataFrame:
+    print(f"\n[INFO] Sampling up to {sample_size} rows for correlation analysis...")
     sample_df = df.sample(n=min(sample_size, len(df)), random_state=42)
     corr_matrix = sample_df.corr(method='spearman').abs()
 
@@ -108,16 +109,25 @@ def drop_highly_correlated_columns_pandas(df: pd.DataFrame, threshold: float = 0
     upper_matrix = corr_matrix.where(upper)
 
     to_drop = set()
+    print(f"\n[INFO] Columns with correlation > {threshold}:")
     for col in upper_matrix.columns:
-        high_corr = upper_matrix[col][upper_matrix[col] > threshold].index
-        to_drop.update(high_corr)
+        high_corr_pairs = upper_matrix[col][upper_matrix[col] > threshold]
+        for idx, corr_value in high_corr_pairs.items():
+            print(f"  - {col} and {idx} | correlation = {corr_value:.4f}")
+            to_drop.add(idx)
+
+    print(f"\n[INFO] Total columns to drop: {len(to_drop)}")
+    if to_drop:
+        print("Dropped columns:", ", ".join(to_drop))
+    else:
+        print("No columns exceed the correlation threshold.")
 
     return df.drop(columns=list(to_drop))
 
 
 def drop_highly_correlated_columns_dask(dask_df: dd.DataFrame, threshold: float = 0.99,
                                         sample_size: int = 10000) -> dd.DataFrame:
-    # Sample and bring to memory for correlation computation
+    print(f"\n[INFO] Sampling up to {sample_size} rows for correlation analysis...")
     sampled_df = dask_df.sample(frac=min(1.0, sample_size / len(dask_df))).compute()
     corr_matrix = sampled_df.corr(method='pearson').abs()
 
@@ -125,8 +135,17 @@ def drop_highly_correlated_columns_dask(dask_df: dd.DataFrame, threshold: float 
     upper_matrix = corr_matrix.where(upper)
 
     to_drop = set()
+    print(f"\n[INFO] Columns with correlation > {threshold}:")
     for col in upper_matrix.columns:
-        high_corr = upper_matrix[col][upper_matrix[col] > threshold].index
-        to_drop.update(high_corr)
+        high_corr_pairs = upper_matrix[col][upper_matrix[col] > threshold]
+        for idx, corr_value in high_corr_pairs.items():
+            print(f"  - {col} and {idx} | correlation = {corr_value:.4f}")
+            to_drop.add(idx)
+
+    print(f"\n[INFO] Total columns to drop: {len(to_drop)}")
+    if to_drop:
+        print("Dropped columns:", ", ".join(to_drop))
+    else:
+        print("No columns exceed the correlation threshold.")
 
     return dask_df.drop(columns=list(to_drop))

@@ -1,8 +1,9 @@
 last_run:
   input_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
     input\\data_hella_single_line\\bookings_single_line_balanced_encoded.parquet"
-  output_path: ''
-  timestamp: '2025-08-13 21:06:28'
+  output_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
+    input\\data_hella_single_line\\bookings_single_line_balanced_encoded_cleaned_spearman.parquet"
+  timestamp: '2025-08-13 21:39:26'
   version: v1
   run_at: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Code\\src\\\
-    data_preprocessing\\single_datasets\\bookings\\models"
+    data_preprocessing"

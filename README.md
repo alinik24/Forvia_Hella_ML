@@ -84,7 +84,7 @@ ___
 Execution Order:
 
 1. Filter Bookstates
-2. Filter Time (Optional)
+2. Filter Time (Optional) & Filter Correlations (corr_cleaning)
 3. Balancing 
 4. Encoding 
 5. Choose one of the feature importance models 
