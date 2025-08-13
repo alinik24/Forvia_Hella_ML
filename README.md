@@ -83,9 +83,10 @@ ___
 
 Execution Order:
 
-1. Filter Time (Optional)
-2. Balancing
-3. Encoding
-4. Choose one of the feature importance models
-5. Filter columns accordingly
-6. Use the prediciton model for predictive quality
+1. Filter Bookstates
+2. Filter Time (Optional)
+3. Balancing 
+4. Encoding 
+5. Choose one of the feature importance models 
+6. Filter columns accordingly 
+7. Use the predictoon model for predictive quality
