@@ -23,7 +23,7 @@ def main():
         print(f"Error loading dataset: {e}")
         return
 
-    X = df.drop(columns=['target'])
+    X = df.drop(columns=['target', 'has_failures'])
     y = df['target']
 
     print("Reporting missing values...")
