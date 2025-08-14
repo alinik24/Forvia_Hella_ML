@@ -83,7 +83,7 @@ ___
 
 Execution Order:
 
-1. Filter Bookstates
+1. Filter Bookstates (Optional)
 2. Filter Time (Optional)
 3. Balancing 
 4. Encoding 
