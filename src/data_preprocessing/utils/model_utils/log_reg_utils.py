@@ -110,7 +110,7 @@ def plot_coefficients(best_model, feature_names, class_index):
     coef_series = pd.Series(coefs, index=feature_names).sort_values()
 
     # Create a figure with a larger size
-    plt.figure(figsize=(12, 26))
+    plt.figure(figsize=(12, len(coefs) * 0.25))
 
     # Create a horizontal bar plot
     bars = plt.barh(coef_series.index, coef_series.values)
