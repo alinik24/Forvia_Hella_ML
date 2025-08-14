@@ -7,12 +7,8 @@ from src.data_preprocessing.utils.load_paths import load_last_run
 from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import plot_feature_importance
 from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import train_gbm_model
 
-from src.data_preprocessing.utils.model_utils.h2o_utils import (
-    initialize_h2o_cluster,
-)
 
-
-def an():
+def main():
     # Start H2O cluster
     h2o.init(max_mem_size_GB=24)
 
@@ -54,12 +50,6 @@ def an():
 
     # Shutdown H2O (optional)
     h2o.shutdown(prompt=False)
-
-
-def main():
-    initialize_h2o_cluster(max_mem_gb=14, max_retries=5)
-    #h2o.init(ip="localhost", port="8080", max_mem_size_GB=24)
-    h2o.demo("glm")
 
 
 if __name__ == "__main__":
