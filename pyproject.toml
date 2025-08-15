@@ -15,6 +15,8 @@ dependencies = [
     "babel==2.17.0",
     "beautifulsoup4==4.13.4",
     "bleach==6.2.0",
+    "catboost>=1.2.8",
+    "category-encoders>=2.8.1",
     "certifi==2025.6.15",
     "cffi==1.17.1",
     "charset-normalizer==3.4.2",
@@ -67,6 +69,7 @@ dependencies = [
     "jupyterlab-pygments==0.3.0",
     "jupyterlab-server==2.27.3",
     "kiwisolver==1.4.8",
+    "lightgbm>=4.6.0",
     "locket==1.0.0",
     "markupsafe==3.0.2",
     "matplotlib==3.10.3",
@@ -138,5 +141,6 @@ dependencies = [
     "webcolors==24.11.1",
     "webencodings==0.5.1",
     "websocket-client==1.8.0",
+    "xgboost>=3.0.4",
     "zipp==3.23.0",
 ]
