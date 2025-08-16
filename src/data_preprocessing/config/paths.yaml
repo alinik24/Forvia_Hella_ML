@@ -1,8 +1,8 @@
 last_run:
   input_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
-    output\\bookmeas\\bookmeas_b_e_2025-03-01_to_2025-03-11.parquet"
+    output\\bookmeas\\filtered\\bookmeas_e_2025-03-19_to_2025-03-28_filtered.parquet"
   output_path: ''
-  timestamp: '2025-08-14 12:18:14'
+  timestamp: '2025-08-16 17:58:19'
   version: v1
   run_at: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Code\\src\\\
     data_preprocessing\\merged_datasets\\bookmeas\\models"

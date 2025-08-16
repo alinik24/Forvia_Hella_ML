@@ -1,6 +1,8 @@
 import h2o
+import pandas as pd
 from h2o.estimators import H2OGradientBoostingEstimator
 from h2o.frame import H2OFrame
+
 
 def train_gbm_model(X_train, y_train, X_test, y_test, seed=42):
     # Convert Pandas to H2O

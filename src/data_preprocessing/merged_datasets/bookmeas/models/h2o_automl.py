@@ -1,5 +1,5 @@
 # Modified Main Script (h2o_automl.py)
-import h2o_automl
+import h2o
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -98,37 +98,37 @@ def main():
         print("Features: Comprehensive type checking, consistent encoding, and schema harmonization")
 
         def detect_target_column(df):
-            print("\n🔍 DETECTING TARGET COLUMN")
+            print("\n DETECTING TARGET COLUMN")
             print("="*30)
             
             common_target_names = ['target', 'book_state']
             available_targets = [col for col in common_target_names if col in df.columns]
             
-            print(f"📊 Dataset shape: {df.shape}")
-            print(f"📝 Available columns ({len(df.columns)}): {list(df.columns[:10])}{'...' if len(df.columns) > 10 else ''}")
+            print(f"Dataset shape: {df.shape}")
+            print(f"Available columns ({len(df.columns)}): {list(df.columns[:10])}{'...' if len(df.columns) > 10 else ''}")
             
             if available_targets:
-                print(f"🎯 Found potential target columns: {available_targets}")
+                print(f"Found potential target columns: {available_targets}")
                 if len(available_targets) == 1:
                     target_col = available_targets[0]
-                    print(f"   ✅ Auto-selected target column: '{target_col}'")
+                    print(f"Auto-selected target column: '{target_col}'")
                 else:
                     print("   Multiple potential target columns found. Please choose:")
                     for i, col in enumerate(available_targets, 1):
                         unique_vals = df[col].nunique()
                         print(f"   {i}. '{col}' (unique values: {unique_vals})")
                     
-                    choice = input("   Enter choice (1-{}): ".format(len(available_targets))).strip()
+                    choice = input("Enter choice (1-{}): ".format(len(available_targets))).strip()
                     try:
                         choice_idx = int(choice) - 1
                         target_col = available_targets[choice_idx]
-                        print(f"   ✅ Selected target column: '{target_col}'")
+                        print(f"Selected target column: '{target_col}'")
                     except (ValueError, IndexError):
                         target_col = available_targets[0]
-                        print(f"   ⚠️ Invalid choice, defaulting to: '{target_col}'")
+                        print(f"Invalid choice, defaulting to: '{target_col}'")
             else:
-                print("❌ No common target column names found.")
-                print("📋 All available columns:")
+                print("No common target column names found.")
+                print("All available columns:")
                 for i, col in enumerate(df.columns, 1):
                     unique_vals = df[col].nunique()
                     data_type = str(df[col].dtype)
@@ -148,33 +148,33 @@ def main():
                         target_col = choice
                         break
                     
-                    print(f"   ❌ Invalid choice '{choice}'. Please try again.")
+                    print(f"Invalid choice '{choice}'. Please try again.")
                 
-                print(f"   ✅ Selected target column: '{target_col}'")
+                print(f"Selected target column: '{target_col}'")
             
             unique_count = df[target_col].nunique()
             missing_count = df[target_col].isna().sum()
             
-            print(f"\n📈 Target column analysis:")
+            print(f"\nTarget column analysis:")
             print(f"   • Column: '{target_col}'")
             print(f"   • Data type: {df[target_col].dtype}")
             print(f"   • Unique values: {unique_count}")
             print(f"   • Missing values: {missing_count} ({missing_count/len(df)*100:.2f}%)")
             
             if unique_count > 20:
-                print(f"   ⚠️ High cardinality target ({unique_count} unique values)")
-                print(f"   This might be a regression problem or need preprocessing.")
+                print(f"High cardinality target ({unique_count} unique values)")
+                print(f"This might be a regression problem or need preprocessing.")
                 
                 sample_values = df[target_col].dropna().head(10).tolist()
-                print(f"   📋 Sample values: {sample_values}")
+                print(f"Sample values: {sample_values}")
                 
                 continue_choice = input("   Continue with this target? (y/n): ").strip().lower()
                 if continue_choice != 'y':
-                    print("   ❌ Target selection aborted by user.")
+                    print("Target selection aborted by user.")
                     raise ValueError("Target column selection aborted.")
             
             if unique_count <= 20:
-                print(f"   📊 Value distribution:")
+                print(f"Value distribution:")
                 value_counts = df[target_col].value_counts().head(10)
                 for val, count in value_counts.items():
                     percentage = count / len(df) * 100
@@ -186,30 +186,30 @@ def main():
 
         def validate_and_encode_target(df, target_column):
             if df[target_column].isna().any():
-                print(f"   ⚠️ Found {df[target_column].isna().sum()} missing values in target column, filling with -1")
+                print(f"Found {df[target_column].isna().sum()} missing values in target column, filling with -1")
                 df[target_column] = df[target_column].fillna(-1)
             
             unique_values = sorted(df[target_column].dropna().unique())
-            print(f"   📊 Original unique values: {unique_values}")
+            print(f"Original unique values: {unique_values}")
             
             if len(unique_values) <= 10:
-                print(f"   🎯 Detected classification problem with {len(unique_values)} classes")
+                print(f"Detected classification problem with {len(unique_values)} classes")
                 
                 if set(unique_values).issubset({0, 1, 2}):
-                    print("   ✅ Target already in correct format (0, 1, 2)")
+                    print("Target already in correct format (0, 1, 2)")
                     df[target_column] = df[target_column].astype(int)
                 else:
-                    print("   🔄 Mapping target values to integers...")
+                    print("Mapping target values to integers...")
                     value_mapping = {val: idx for idx, val in enumerate(unique_values)}
-                    print(f"   📋 Value mapping: {value_mapping}")
+                    print(f"Value mapping: {value_mapping}")
                     
                     df[target_column] = df[target_column].map(value_mapping)
                     df[target_column] = df[target_column].fillna(-1).astype(int)
             else:
-                print(f"   📈 Detected potential regression problem with {len(unique_values)} unique values")
-                print("   🤔 Options for handling continuous target:")
-                print("   1. Keep as regression problem (convert to float)")
-                print("   2. Bin into categories (convert to classification)")
+                print(f"Detected potential regression problem with {len(unique_values)} unique values")
+                print("Options for handling continuous target:")
+                print("1. Keep as regression problem (convert to float)")
+                print("2. Bin into categories (convert to classification)")
                 
                 choice = input("   Enter choice (1 or 2): ").strip()
                 
@@ -220,15 +220,15 @@ def main():
                     df[target_column], bin_edges = pd.cut(df[target_column], bins=n_bins, labels=False, retbins=True)
                     df[target_column] = df[target_column].fillna(-1).astype(int)
                     
-                    print(f"   ✅ Binned target into {n_bins} categories")
-                    print(f"   📊 Bin edges: {[f'{edge:.3f}' for edge in bin_edges]}")
+                    print(f"Binned target into {n_bins} categories")
+                    print(f"Bin edges: {[f'{edge:.3f}' for edge in bin_edges]}")
                 else:
                     df[target_column] = pd.to_numeric(df[target_column], errors='coerce').fillna(0.0)
-                    print("   ✅ Converted to continuous regression target")
+                    print("Converted to continuous regression target")
             
             if df[target_column].dtype in ['int64', 'int32', 'int8', 'int16']:
                 class_counts = df[target_column].value_counts().sort_index()
-                print(f"   ✅ Final target encoding:")
+                print(f"Final target encoding:")
                 for class_val, count in class_counts.items():
                     percentage = (count / len(df)) * 100
                     print(f"      • Class {class_val}: {count} samples ({percentage:.2f}%)")
@@ -236,17 +236,17 @@ def main():
             return df
 
         if data_choice == "1":
-            print("📂 Loading raw dataset for train/test split...")
+            print("Loading raw dataset for train/test split...")
             raw_df = load_data_with_polars(original_raw_path)
             
             target_column = detect_target_column(raw_df)
             raw_df = validate_and_encode_target(raw_df, target_column)
 
-            print("\n🔀 Performing stratified test split...")
+            print("\nPerforming stratified test split...")
             valid_targets = raw_df[target_column].isin([0, 1, 2])
             if not valid_targets.all():
                 invalid_count = (~valid_targets).sum()
-                print(f"   ⚠️ Removing {invalid_count} rows with invalid target values for splitting")
+                print(f"Removing {invalid_count} rows with invalid target values for splitting")
                 raw_df = raw_df[valid_targets]
             
             test_size = 0.1
@@ -256,20 +256,20 @@ def main():
             test_df = raw_df.loc[test_indices]
             train_df = raw_df.drop(test_indices)
             
-            print(f"   ✅ Split completed: Train={len(train_df)} samples, Test={len(test_df)} samples")
+            print(f"Split completed: Train={len(train_df)} samples, Test={len(test_df)} samples")
 
-            print("\n🔧 Applying comprehensive schema harmonization...")
+            print("\nApplying comprehensive schema harmonization...")
             train_df, test_df = comprehensive_schema_harmonization(train_df, test_df, target_column)
             
             temp_train_path = os.path.join(output_path, "train_split.parquet")
             temp_test_path = os.path.join(output_path, "test_split.parquet")
             train_df.to_parquet(temp_train_path, index=False)
             test_df.to_parquet(temp_test_path, index=False)
-            print(f"💾 Saved train dataset to: {temp_train_path}")
-            print(f"💾 Saved test dataset to: {temp_test_path}")
+            print(f"Saved train dataset to: {temp_train_path}")
+            print(f"Saved test dataset to: {temp_test_path}")
 
         else:  # data_choice == "2"
-            print("📂 Loading pre-split train and test datasets...")
+            print("Loading pre-split train and test datasets...")
             train_df = load_data_with_polars(train_path)
             test_df = load_data_with_polars(test_path)
             
@@ -278,13 +278,13 @@ def main():
             train_df = validate_and_encode_target(train_df, target_column)
             test_df = validate_and_encode_target(test_df, target_column)
             
-            print("\n🔧 Applying comprehensive schema harmonization...")
+            print("\nApplying comprehensive schema harmonization...")
             train_df, test_df = comprehensive_schema_harmonization(train_df, test_df, target_column)
             
             train_df.to_parquet(train_path, index=False)
             test_df.to_parquet(test_path, index=False)
-            print(f"💾 Overwrote original train file with preprocessed data: {train_path}")
-            print(f"💾 Overwrote original test file with preprocessed data: {test_path}")
+            print(f"Overwrote original train file with preprocessed data: {train_path}")
+            print(f"Overwrote original test file with preprocessed data: {test_path}")
 
         save_last_run(
             data_choice=data_choice,
@@ -306,9 +306,9 @@ def main():
         final_train = pd.read_parquet(stats_train_path)
         final_test = pd.read_parquet(stats_test_path)
         
-        print(f"📊 Training Dataset:")
-        print(f"   • Shape: {final_train.shape}")
-        print(f"   • Memory Usage: {final_train.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
+        print(f"Training Dataset:")
+        print(f"• Shape: {final_train.shape}")
+        print(f"• Memory Usage: {final_train.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
         
         train_class_dist = final_train[target_column].value_counts().sort_index()
         print(f"   • Class Distribution:")
@@ -316,17 +316,17 @@ def main():
             percentage = (count / len(final_train)) * 100
             print(f"      - Class {class_val}: {count} samples ({percentage:.2f}%)")
         
-        print(f"\n📊 Test Dataset:")
-        print(f"   • Shape: {final_test.shape}")
-        print(f"   • Memory Usage: {final_test.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
+        print(f"\nTest Dataset:")
+        print(f"• Shape: {final_test.shape}")
+        print(f"• Memory Usage: {final_test.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
         
         test_class_dist = final_test[target_column].value_counts().sort_index()
-        print(f"   • Class Distribution:")
+        print(f"• Class Distribution:")
         for class_val, count in test_class_dist.items():
             percentage = (count / len(final_test)) * 100
-            print(f"      - Class {class_val}: {count} samples ({percentage:.2f}%)")
+            print(f"- Class {class_val}: {count} samples ({percentage:.2f}%)")
 
-        print(f"\n🔍 Schema Consistency Check:")
+        print(f"\nSchema Consistency Check:")
         schema_mismatches = []
         for col in final_train.columns:
             if col in final_test.columns:
@@ -338,14 +338,14 @@ def main():
                     })
         
         if schema_mismatches:
-            print(f"   ❌ Found {len(schema_mismatches)} schema mismatches:")
+            print(f"Found {len(schema_mismatches)} schema mismatches:")
             for mismatch in schema_mismatches:
                 print(f"      • {mismatch['column']}: train={mismatch['train_dtype']} vs test={mismatch['test_dtype']}")
             raise ValueError("Schema mismatches detected between train and test datasets!")
         else:
-            print(f"   ✅ All {len(final_train.columns)} columns have consistent data types")
+            print(f"All {len(final_train.columns)} columns have consistent data types")
         
-        print("✅ Configuration saved successfully")
+        print("Configuration saved successfully")
 
         print("\n" + "="*70)
         print("STARTING COMPREHENSIVE H2O AUTOML PIPELINE")
@@ -371,20 +371,20 @@ def main():
         if results:
             best_model, leaderboard, summary_stats = results
             print("\n" + "="*70)
-            print("🎉 COMPREHENSIVE AUTOML PIPELINE COMPLETED SUCCESSFULLY!")
+            print("COMPREHENSIVE AUTOML PIPELINE COMPLETED SUCCESSFULLY!")
             print("="*70)
-            print(f"🏆 Champion Model: {best_model.model_id}")
-            print(f"🎯 Algorithm Type: {summary_stats['best_algorithm']}")
-            print(f"📊 Test Accuracy: {summary_stats['final_metrics']['accuracy']:.4f}")
+            print(f"Champion Model: {best_model.model_id}")
+            print(f"Algorithm Type: {summary_stats['best_algorithm']}")
+            print(f"Test Accuracy: {summary_stats['final_metrics']['accuracy']:.4f}")
             auc_score = summary_stats['final_metrics'].get('auc', 'N/A')
             if auc_score != 'N/A' and auc_score is not None:
-                print(f"🎪 ROC AUC: {auc_score:.4f}")
+                print(f"ROC AUC: {auc_score:.4f}")
             else:
-                print(f"🎪 ROC AUC: {auc_score}")
-            print(f"🔢 Total Models Trained: {summary_stats['total_models_trained']}")
-            print(f"📁 Results Location: {output_path}")
+                print(f"ROC AUC: {auc_score}")
+            print(f"Total Models Trained: {summary_stats['total_models_trained']}")
+            print(f"Results Location: {output_path}")
             print("="*70)
-            print("\n📋 Generated Reports & Visualizations:")
+            print("\nGenerated Reports & Visualizations:")
             key_files = [
                 "comprehensive_leaderboard.csv",
                 "model_comparison_metrics.json",
@@ -395,27 +395,27 @@ def main():
             for file in key_files:
                 file_path = os.path.join(output_path, file)
                 if os.path.exists(file_path):
-                    print(f"   ✅ {file}")
+                    print(f"{file}")
                 else:
-                    print(f"   ⚠️ {file} (not generated)")
+                    print(f"{file} (not generated)")
         else:
-            print("❌ Pipeline execution failed. Check error logs above.")
+            print("Pipeline execution failed. Check error logs above.")
 
     except KeyboardInterrupt:
-        print("\n⚠️ Pipeline interrupted by user.")
+        print("\nPipeline interrupted by user.")
     except Exception as e:
-        print(f"\n❌ Critical error occurred: {e}")
+        print(f"\nCritical error occurred: {e}")
         import traceback
         traceback.print_exc()
     finally:
         try:
             conn = h2o.connection()
             if conn and conn.connected:
-                print("\n🔄 Shutting down H2O cluster...")
+                print("\nShutting down H2O cluster...")
                 h2o.shutdown(prompt=False)
-                print("✅ H2O cluster shutdown complete.")
+                print("H2O cluster shutdown complete.")
         except:
-            print("⚠️ H2O cluster cleanup completed.")
+            print("H2O cluster cleanup completed.")
 
 if __name__ == "__main__":
     main()

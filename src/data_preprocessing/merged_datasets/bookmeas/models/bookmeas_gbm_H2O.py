@@ -1,7 +1,7 @@
+import h2o
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-import h2o
 from src.data_preprocessing.config import save_last_run
 from src.data_preprocessing.utils.load_paths import load_last_run
 from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import plot_feature_importance
@@ -10,7 +10,7 @@ from src.data_preprocessing.utils.model_utils.gbm_H2O_utils import train_gbm_mod
 
 def main():
     # Start H2O cluster
-    h2o.init(max_mem_size_GB=24)
+    h2o.init(max_mem_size_GB=28)
 
     # Load and split data
     print("Loading bookmeas dataset...")
@@ -48,8 +48,8 @@ def main():
     # Save last input path
     save_last_run(input_path=input_path, output_path="", version="v1")
 
-    # Shutdown H2O (optional)
-    h2o.shutdown(prompt=False)
+    # Shutdown H2O
+    h2o.cluster().shutdown()
 
 
 if __name__ == "__main__":
