@@ -60,7 +60,7 @@ def load_last_run():
                 with open(config_path, 'r') as f:
                     config = json.load(f)
                 if 'timestamp' in config:
-                    print(f"📅 Last run: {config['timestamp']}")
+                    print(f"Last run: {config['timestamp']}")
                 return config
             except Exception as e:
                 print(f"Could not load configuration from {config_path}: {e}")
@@ -91,7 +91,7 @@ def initialize_h2o_cluster(max_mem_gb=14, max_retries=5):
                 pass
 
             port = find_free_port()
-            print(f"   🔌 Attempting to use port: {port}")
+            print(f"Attempting to use port: {port}")
 
             ice_root_path = "./h2o_cache"
             if not os.path.exists(ice_root_path):
@@ -117,7 +117,7 @@ def initialize_h2o_cluster(max_mem_gb=14, max_retries=5):
             return
 
         except Exception as e:
-            print(f"❌ Attempt {attempt + 1}/{max_retries} failed to initialize H2O cluster: {e}")
+            print(f"Attempt {attempt + 1}/{max_retries} failed to initialize H2O cluster: {e}")
             if attempt < max_retries - 1:
                 time.sleep(5)
             else:
@@ -138,7 +138,7 @@ def load_data_with_polars(file_path):
 
 
 def remove_problematic_columns(train_df, test_df, target_column):
-    print("🧹 Removing problematic columns...")
+    print("Removing problematic columns...")
 
     columns_to_remove = []
     problematic_patterns = [
@@ -301,7 +301,7 @@ def comprehensive_schema_harmonization(train_df: pd.DataFrame, test_df: pd.DataF
     train_harmonized = train_harmonized[column_order]
     test_harmonized = test_harmonized[column_order]
 
-    print("   🗜️ Optimizing memory usage...")
+    print("Optimizing memory usage...")
     initial_memory = train_harmonized.memory_usage(deep=True).sum() + test_harmonized.memory_usage(deep=True).sum()
 
     for col in train_harmonized.select_dtypes(include=[np.number]).columns:
@@ -422,7 +422,7 @@ def train_comprehensive_automl(automl, x, y, training_frame, validation_frame, l
         print(f"AutoML training completed in {training_time / 60:.2f} minutes")
 
         if automl.leader is None:
-            print("❌ AutoML failed to produce a leader model. The leaderboard is empty.")
+            print("AutoML failed to produce a leader model. The leaderboard is empty.")
             return None, None, training_time
 
         leaderboard = h2o.automl.get_leaderboard(automl, extra_columns='ALL')
@@ -487,7 +487,7 @@ def analyze_model_performance(automl, leaderboard, test_frame, y, output_path):
         print(f"   • Algorithm: {leader.__class__.__name__}")
 
         try:
-            print("   🔮 Making test predictions...")
+            print("Making test predictions...")
             test_predictions = leader.predict(test_frame)
             test_actual = test_frame[y].as_data_frame()[y]
             test_pred_df = test_predictions.as_data_frame()
