@@ -85,10 +85,10 @@ ___
 Execution Order:
 
 1. Filter Bookstates (Optional)
-2. Filter Time (Optional)
+2. Filter Time (Optional, if size of the dataset needs to be reduced)
 3. Balancing 
 4. Encoding 
 5. Clean Correlations 
 6. Choose one of the feature importance models (GBM, Lasso, Ridge, Logistic Regression)
-7. Filter columns accordingly 
+7. Filter columns accordingly (Optional, if size of the dataset needs to be reduced)
 8. Use the prediction model for predictive quality
