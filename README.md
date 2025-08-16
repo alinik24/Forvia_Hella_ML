@@ -6,7 +6,8 @@ This guide will walk you through the process of setting up a Python environment 
 
 ## Prerequisites
 
-- Python installed on your system.
+- Python installed on your system. (Ideally 3.10)
+- Java SDK is installed on your system. (Ideally latest stable version)
 - `pip` installed and updated.
 - `uv` installed if you plan to use it.
 
@@ -88,6 +89,6 @@ Execution Order:
 3. Balancing 
 4. Encoding 
 5. Clean Correlations 
-6. Choose one of the feature importance models 
+6. Choose one of the feature importance models (GBM, Lasso, Ridge, Logistic Regression)
 7. Filter columns accordingly 
 8. Use the prediction model for predictive quality
