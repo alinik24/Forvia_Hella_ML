@@ -12,11 +12,11 @@ def main():
         input_path = last_paths.get("input_path")
         if not input_path:
             print("No last input path found in config. Please enter manually.")
-            input_path = input("Enter path to encoded bookmeas dataset (parquet): ").strip()
+            input_path = input("Enter path to encoded bookings dataset (parquet): ").strip()
     else:
-        input_path = input("Enter path to encoded bookmeas dataset (parquet): ").strip()
+        input_path = input("Enter path to encoded bookings dataset (parquet): ").strip()
 
-    print(f"Loading bookmeas dataset from {input_path} ...")
+    print(f"Loading bookings dataset from {input_path} ...")
     try:
         df = pd.read_parquet(input_path)
     except Exception as e:
@@ -24,7 +24,10 @@ def main():
         return
 
     X = df.drop(columns=['target'])
-    X = X.drop(columns=['has_failures', 'sequence_number'])
+    columns_to_drop = ['has_failures', 'sequence_number']
+    for column in columns_to_drop:
+        if column in X.columns:
+            X = X.drop(columns=[column])
     y = df['target']
 
     print("Reporting missing values...")
