@@ -24,7 +24,10 @@ def main():
         return
 
     X = df.drop(columns=['target'])
-    X = X.drop(columns=['has_failures'])
+    columns_to_drop = ['has_failures', 'sequence_number']
+    for column in columns_to_drop:
+        if column in X.columns:
+            X = X.drop(columns=[column])
     y = df['target']
 
     print("Reporting missing values...")

@@ -29,7 +29,11 @@ def main():
         return
 
     # Separate features and target
-    X = df.drop(columns=['target', 'has_failures', 'sequence_number'])
+    X = df.drop(columns=['target'])
+    columns_to_drop = ['has_failures', 'sequence_number']
+    for column in columns_to_drop:
+        if column in X.columns:
+            X = X.drop(columns=[column])
     y = df['target']
 
     # Split into training and testing sets

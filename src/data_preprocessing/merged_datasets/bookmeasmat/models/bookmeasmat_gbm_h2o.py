@@ -13,7 +13,7 @@ def main():
     h2o.init(max_mem_size_GB=28)
 
     # Load and split data
-    print("Loading bookmeas dataset...")
+    print("Loading bookmeasmat dataset...")
     reuse_last = input("Reuse last input path? (y/n): ").strip().lower() == "y"
 
     if reuse_last:
@@ -21,11 +21,11 @@ def main():
         input_path = last_paths.get("input_path")
         if not input_path:
             print("No last input path found in config. Please enter manually.")
-            input_path = input("Enter path to encoded bookmeas dataset (parquet): ").strip()
+            input_path = input("Enter path to encoded bookmeasmat dataset (parquet): ").strip()
     else:
-        input_path = input("Enter path to encoded bookmeas dataset (parquet): ").strip()
+        input_path = input("Enter path to encoded bookmeasmat dataset (parquet): ").strip()
 
-    print(f"Loading bookmeas dataset from {input_path} ...")
+    print(f"Loading bookmeasmat dataset from {input_path} ...")
     try:
         df = pd.read_parquet(input_path)
     except Exception as e:
