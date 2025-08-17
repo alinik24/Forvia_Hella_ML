@@ -23,7 +23,11 @@ def main():
         print(f"Error loading dataset: {e}")
         return
 
-    X = df.drop(columns=['target', 'has_failures'])
+    X = df.drop(columns=['target'])
+    columns_to_drop = ['has_failures', 'sequence_number']
+    for column in columns_to_drop:
+        if column in X.columns:
+            X = X.drop(columns=[column])
     y = df['target']
 
     print("Reporting missing values...")
@@ -44,7 +48,8 @@ def main():
     plot_ridge_path(X, y)
 
     print("Plotting coefficient values...")
-    plot_nonzero_coef_distribution(ridge_model, X.columns)
+    plot_coefficients(ridge_model, X.columns)
+    plot_all_coefs_sorted(ridge_model, X.columns)
 
     print("Plotting distribution of coefficients...")
     plot_nonzero_coef_distribution(ridge_model)

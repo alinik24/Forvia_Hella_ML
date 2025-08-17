@@ -99,7 +99,7 @@ def analyze_missingness(df):
     return df
 
 
-def drop_highly_correlated_columns_pandas(df: pd.DataFrame, threshold: float = 0.99,
+def drop_highly_correlated_columns_pandas(df: pd.DataFrame, threshold: float = 0.95,
                                           sample_size: int = 10000) -> pd.DataFrame:
     print(f"\n[INFO] Sampling up to {sample_size} rows for correlation analysis...")
     sample_df = df.sample(n=min(sample_size, len(df)), random_state=42)
@@ -125,7 +125,7 @@ def drop_highly_correlated_columns_pandas(df: pd.DataFrame, threshold: float = 0
     return df.drop(columns=list(to_drop))
 
 
-def drop_highly_correlated_columns_dask(dask_df: dd.DataFrame, threshold: float = 0.99,
+def drop_highly_correlated_columns_dask(dask_df: dd.DataFrame, threshold: float = 0.95,
                                         sample_size: int = 10000) -> dd.DataFrame:
     print(f"\n[INFO] Sampling up to {sample_size} rows for correlation analysis...")
     sampled_df = dask_df.sample(frac=min(1.0, sample_size / len(dask_df))).compute()

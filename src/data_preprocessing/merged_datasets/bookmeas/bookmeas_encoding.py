@@ -37,6 +37,8 @@ def main():
 
     try:
         print("Preprocessing data...")
+        # Enter all datetime and boolean columns! Double check with the column_exploration file
+        # If the Vectorizer makes problems, delete the pickle file and let it run anew
         y, feature_names, preprocessed_df = preprocess_data(
             df,
             target_column='book_state',

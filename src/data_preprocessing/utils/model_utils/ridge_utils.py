@@ -16,7 +16,13 @@ def run_ridge(X, y, alphas=np.logspace(0, 10, 100), cv=3, scoring='neg_mean_squa
 
 def plot_feature_importance(ridge_model, feature_names, top_n=20):
     """Rank features by absolute coefficient magnitude"""
-    coefs = pd.Series(ridge_model.coef_, index=feature_names)
+    # Handle multiclass: average across classes
+    if ridge_model.coef_.ndim > 1:
+        coefs = ridge_model.coef_.mean(axis=0)
+    else:
+        coefs = ridge_model.coef_
+
+    coefs = pd.Series(coefs, index=feature_names)
     ranked = coefs.abs().sort_values(ascending=False).head(top_n)
 
     plt.figure(figsize=(10, 6))
@@ -29,7 +35,12 @@ def plot_feature_importance(ridge_model, feature_names, top_n=20):
 
 
 def plot_coefficients(ridge_model, feature_names):
-    coefs = pd.Series(ridge_model.coef_, index=feature_names).sort_values(key=abs, ascending=True)
+    if ridge_model.coef_.ndim > 1:
+        coefs = ridge_model.coef_.mean(axis=0)
+    else:
+        coefs = ridge_model.coef_
+
+    coefs = pd.Series(coefs, index=feature_names).sort_values(key=abs, ascending=True)
 
     wrapped_labels = ['\n'.join(textwrap.wrap(label, 30)) for label in coefs.index]
     coefs.index = wrapped_labels
@@ -47,20 +58,28 @@ def plot_coefficients(ridge_model, feature_names):
 def plot_nonzero_coef_distribution(ridge_model, threshold=1e-6):
     """Histogram of coefficients above a small threshold"""
     coefs = ridge_model.coef_
-    significant = coefs[np.abs(coefs) > threshold]
+    if coefs.ndim == 1:  # binary case
+        coefs = coefs[np.newaxis, :]
 
-    plt.figure(figsize=(8, 5))
-    plt.hist(significant, bins=30, color='lightgreen', edgecolor='black')
-    plt.title('Distribution of Ridge Coefficients (|coef| > threshold)')
-    plt.xlabel('Coefficient Value')
-    plt.ylabel('Frequency')
-    plt.tight_layout()
-    plt.show()
+    for i, class_name in enumerate(ridge_model.classes_):
+        significant = coefs[i][np.abs(coefs[i]) > threshold]
+        plt.figure(figsize=(8, 5))
+        plt.hist(significant, bins=30, color='lightgreen', edgecolor='black')
+        plt.title(f'Distribution of Ridge Coefficients for class {class_name} (|coef| > threshold)')
+        plt.xlabel('Coefficient Value')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        plt.show()
 
 
 def plot_all_coefs_sorted(ridge_model, feature_names):
     """Plot all coefficients sorted by absolute value"""
-    coefs = pd.Series(ridge_model.coef_, index=feature_names)
+    if ridge_model.coef_.ndim > 1:
+        coefs = ridge_model.coef_.mean(axis=0)
+    else:
+        coefs = ridge_model.coef_
+
+    coefs = pd.Series(coefs, index=feature_names)
     sorted_coefs = coefs.sort_values(key=abs)
 
     plt.figure(figsize=(12, len(coefs) * 0.25))
@@ -78,7 +97,8 @@ def plot_ridge_path(X, y, alphas=np.logspace(-4, 4, 100)):
     coefs = []
 
     for alpha in alphas:
-        coef = ridge_regression(X_scaled, y, alpha=alpha)
+        y_numeric = pd.Categorical(y).codes
+        coef = ridge_regression(X_scaled, y_numeric, alpha=alpha)
         coefs.append(coef)
 
     coefs = np.array(coefs)
