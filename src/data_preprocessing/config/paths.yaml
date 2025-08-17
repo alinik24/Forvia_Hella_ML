@@ -1,9 +1,8 @@
 last_run:
   input_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
-    output\\bookmeas\\bookmeas_e_2025-03-19_to_2025-03-28.parquet"
-  output_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
-    output\\bookmeas\\bookmeas_e_2025-03-19_to_2025-03-28_cleaned_spearman.parquet"
-  timestamp: '2025-08-17 18:31:13'
+    input\\materials\\materials_1_week_balanced_encoded_cleaned_spearman.parquet"
+  output_path: ''
+  timestamp: '2025-08-17 19:35:50'
   version: v1
   run_at: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Code\\src\\\
-    data_preprocessing"
+    data_preprocessing\\single_datasets\\materials\\models"

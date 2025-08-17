@@ -36,6 +36,7 @@ def main():
         return
 
     try:
+        # NOTE: Delete Vectorizer pickle beforehand, if you are changing datasets
         print("Preprocessing data...")
         y, feature_names, preprocessed_df = preprocess_data(
             df,
