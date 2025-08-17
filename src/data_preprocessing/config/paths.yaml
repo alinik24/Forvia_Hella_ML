@@ -1,8 +1,8 @@
 last_run:
   input_path: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Data\\\
-    input\\materials\\materials_1_week_balanced_encoded_cleaned_spearman.parquet"
+    input\\data_hella_single_line\\measurements_single_line_balanced_encoded_cleaned_spearman.parquet"
   output_path: ''
-  timestamp: '2025-08-17 19:35:50'
+  timestamp: '2025-08-17 20:50:49'
   version: v1
   run_at: "D:\\Universit\xE4t\\Master\\Semester2\\RealWorld_ML_Problems\\Code\\src\\\
-    data_preprocessing\\single_datasets\\materials\\models"
+    data_preprocessing\\single_datasets\\measurements\\models"
