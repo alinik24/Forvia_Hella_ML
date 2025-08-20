@@ -1,9 +1,0 @@
-{
-    "data_choice": "1",
-    "original_raw_path": "C:\\Users\\alina\\Downloads\\bookmeas_4_week_anonym_final_filtered_20250810_023451.parquet",
-    "train_path": null,
-    "test_path": null,
-    "output_path": "C:\\Desktop\\Research and Thesis\\RWML projects\\Forvia_Project\\Forvia_Project\\data\\output",
-    "target_column": "book_state",
-    "timestamp": "2025-08-11T01:30:17.778224"
-}

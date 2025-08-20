@@ -2,7 +2,7 @@ import gc
 from datetime import datetime
 from pathlib import Path
 
-from src.data_preprocessing.config import save_last_run
+from src.data_preprocessing.utils.save_last_run import save_last_run
 from src.data_preprocessing.utils.bs_filtering import find_latest_file, filter_for_anomalous_candidates, \
     analyze_serial_number_book_states
 from src.data_preprocessing.utils.dynamic_exclusion import DynamicExclusionPipeline

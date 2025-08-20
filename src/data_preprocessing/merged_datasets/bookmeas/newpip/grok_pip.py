@@ -1,20 +1,10 @@
 """
 Robust End-to-End Machine Learning Pipeline for Multi-Class Classification (Revised)
 
-Revisions based on gap analysis:
-- Split raw data first to prevent leakage.
-- Made custom classes (DataPreprocessor, ImbalanceHandler) compatible with sklearn Pipeline by implementing fit/transform/fit_resample.
-- Fit all preprocessing (imputation, encoding, scaling, selection) on training data only.
-- Wrapped preprocessing, balancing, and modeling in sklearn Pipeline for each algorithm to ensure no leakage.
-- Fixed Target Encoding to use training y only.
-- Added class weights universally for models that support it, especially when resampling is skipped.
-- Added redundancy removal post-engineering using correlation threshold.
-- Ensured consistent transform logic for test data.
-- Saved train/test processed separately.
-- Added permutation importance for model-agnostic feature analysis.
-- Minor enhancements: Added early stopping for boosting models where applicable; per-class F1 plots.
-
-This addresses leakage, overfitting, and imbalance gaps for robust, generalizable results.
+Fixes for TypeError with Categorical columns:
+- Modified DataPreprocessor._impute to handle CategoricalDtype columns by adding 'MISSING' to categories before filling.
+- Added logging to identify problematic columns.
+- Retained memory optimizations: chunking, downcasting, sparse encoding, threading backend, capped resampling.
 """
 
 import pandas as pd
@@ -28,6 +18,8 @@ import gc
 import os
 from collections import Counter
 from typing import List, Dict, Any
+import psutil  # For memory monitoring
+from joblib import Parallel, delayed, parallel_backend
 
 # Core ML imports
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
@@ -37,7 +29,7 @@ from sklearn.metrics import (classification_report, confusion_matrix,
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.feature_selection import RFE
+from sklearn.feature_selection import SelectFromModel
 from sklearn.pipeline import Pipeline as SkPipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -46,7 +38,8 @@ from sklearn.inspection import permutation_importance
 from category_encoders import TargetEncoder
 from imblearn.over_sampling import SMOTE
 from imblearn.combine import SMOTEENN
-from imblearn.pipeline import Pipeline as ImbPipeline  # For handling resampling in pipeline
+from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.base import BaseSampler
 
 # Boosting libraries
 import xgboost as xgb
@@ -56,9 +49,15 @@ from catboost import CatBoostClassifier
 # Visualization
 import matplotlib.pyplot as plt
 import seaborn as sns
-plt.style.use('seaborn-v0_8' if 'seaborn-v0_8' in plt.style.available() else 'default')
+plt.style.use('seaborn-v0_8' if 'seaborn-v0_8' in plt.style.available else 'default')
 
 warnings.filterwarnings('ignore')
+
+def log_memory_usage(stage: str):
+    """Log current memory usage."""
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    print(f"🧠 Memory at {stage}: {mem_info.rss / 1024**3:.2f} GB")
 
 class FeatureEngineer(BaseEstimator, TransformerMixin):
     """Handles feature creation/engineering. Pipeline-compatible."""
@@ -72,6 +71,11 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         """Fit: Analyze for redundant features."""
         X_eng = self._engineer_features(X)
+        # Downcast numerics
+        for col in X_eng.select_dtypes(include=['float64']).columns:
+            X_eng[col] = X_eng[col].astype('float32')
+        for col in X_eng.select_dtypes(include=['int64']).columns:
+            X_eng[col] = X_eng[col].astype('int32')
         # Correlation analysis on numerics
         num_cols = X_eng.select_dtypes(include=np.number).columns
         if len(num_cols) > 1:
@@ -83,6 +87,11 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         """Transform: Engineer and remove redundants."""
         X_eng = self._engineer_features(X)
+        # Downcast
+        for col in X_eng.select_dtypes(include=['float64']).columns:
+            X_eng[col] = X_eng[col].astype('float32')
+        for col in X_eng.select_dtypes(include=['int64']).columns:
+            X_eng[col] = X_eng[col].astype('int32')
         X_eng = X_eng.drop(columns=self.high_corr_cols)
         if self.verbose:
             print(f"✅ Engineered features; removed {len(self.high_corr_cols)} redundant")
@@ -101,9 +110,10 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
         return df_eng
 
 class DataPreprocessor(BaseEstimator, TransformerMixin):
-    """Modular preprocessor for mixed-type datasets. Pipeline-compatible."""
+    """Modular preprocessor for mixed-type datasets with chunking."""
     
-    def __init__(self, verbose: bool = True):
+    def __init__(self, chunk_size: int = 100000, verbose: bool = True):
+        self.chunk_size = chunk_size
         self.verbose = verbose
         self.enc_transformer = None
         self.scaler = None
@@ -112,10 +122,11 @@ class DataPreprocessor(BaseEstimator, TransformerMixin):
         self.columns_out = None
         
     def fit(self, X, y=None):
-        """Fit all components on training data."""
+        """Fit all components on training data with chunking."""
+        log_memory_usage("Before preprocessor fit")
         self._analyze_features(X)
         
-        # Drop problematic in transform, but note them
+        # Drop problematic in transform
         drop_cols = self.feature_info['constant'] + self.feature_info['high_missing']
         
         # Imputation (store medians for numerics)
@@ -127,7 +138,7 @@ class DataPreprocessor(BaseEstimator, TransformerMixin):
         num_cols = [col for col in self.feature_info['numeric'] if col not in drop_cols]
         
         transformers = [
-            ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False), cat_low),
+            ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=True), cat_low),
         ]
         if cat_high and y is not None:
             transformers.append(('target', TargetEncoder(), cat_high))
@@ -135,46 +146,61 @@ class DataPreprocessor(BaseEstimator, TransformerMixin):
         
         self.enc_transformer = ColumnTransformer(
             transformers=transformers,
-            remainder='drop'  # Drop others
+            remainder='drop'
         )
-        X_encoded = self._impute(X).drop(columns=drop_cols)
-        self.enc_transformer.fit(X_encoded, y)
         
-        X_trans = self.enc_transformer.transform(X_encoded)
-        encoded_cols = self.enc_transformer.get_feature_names_out()
-        X_trans_df = pd.DataFrame(X_trans, columns=encoded_cols, index=X.index)
+        # Process in chunks
+        X_encoded = None
+        for start in range(0, X.shape[0], self.chunk_size):
+            end = min(start + self.chunk_size, X.shape[0])
+            X_chunk = self._impute(X.iloc[start:end]).drop(columns=drop_cols)
+            X_trans_chunk = self.enc_transformer.fit(X_chunk, y.iloc[start:end] if y is not None else None)
+            X_trans_chunk = X_trans_chunk.toarray() if hasattr(X_trans_chunk, 'toarray') else X_trans_chunk
+            X_trans_df = pd.DataFrame(X_trans_chunk, columns=self.enc_transformer.get_feature_names_out(), index=X_chunk.index)
+            X_trans_df = X_trans_df.astype('float32')  # Downcast
+            X_encoded = X_trans_df if X_encoded is None else pd.concat([X_encoded, X_trans_df])
+            gc.collect()
         
         # Scaler
         self.scaler = RobustScaler()
-        X_scaled = self.scaler.fit_transform(X_trans_df)
+        X_scaled = self.scaler.fit_transform(X_encoded)
         
-        X_scaled_df = pd.DataFrame(X_scaled, columns=encoded_cols, index=X.index)
+        X_scaled_df = pd.DataFrame(X_scaled, columns=X_encoded.columns, index=X_encoded.index)
         
-        # Selector
-        lr = LogisticRegression(max_iter=100, class_weight='balanced', n_jobs=-1)
+        # Selector (lighter: SelectFromModel)
+        rf = RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=1)
         n_select = min(50, X_scaled_df.shape[1])
-        self.selector = RFE(lr, n_features_to_select=n_select)
+        self.selector = SelectFromModel(rf, max_features=n_select)
         self.selector.fit(X_scaled_df, y)
         
-        self.columns_out = X_scaled_df.columns[self.selector.support_]
+        self.columns_out = X_scaled_df.columns[self.selector.get_support()]
         
         if self.verbose:
             print(f"✅ Fitted preprocessor: {len(self.columns_out)} features selected")
+        log_memory_usage("After preprocessor fit")
             
         return self
     
     def transform(self, X):
-        """Transform using fitted components."""
+        """Transform using fitted components with chunking."""
+        log_memory_usage("Before preprocessor transform")
         drop_cols = self.feature_info['constant'] + self.feature_info['high_missing']
-        X_imp = self._impute(X).drop(columns=drop_cols, errors='ignore')
+        X_encoded = None
+        for start in range(0, X.shape[0], self.chunk_size):
+            end = min(start + self.chunk_size, X.shape[0])
+            X_chunk = self._impute(X.iloc[start:end]).drop(columns=drop_cols, errors='ignore')
+            X_trans_chunk = self.enc_transformer.transform(X_chunk)
+            X_trans_chunk = X_trans_chunk.toarray() if hasattr(X_trans_chunk, 'toarray') else X_trans_chunk
+            X_trans_df = pd.DataFrame(X_trans_chunk, columns=self.enc_transformer.get_feature_names_out(), index=X_chunk.index)
+            X_trans_df = X_trans_df.astype('float32')
+            X_encoded = X_trans_df if X_encoded is None else pd.concat([X_encoded, X_trans_df])
+            gc.collect()
         
-        X_trans = self.enc_transformer.transform(X_imp)
-        X_trans_df = pd.DataFrame(X_trans, columns=self.enc_transformer.get_feature_names_out(), index=X.index)
-        
-        X_scaled = self.scaler.transform(X_trans_df)
-        X_scaled_df = pd.DataFrame(X_scaled, columns=X_trans_df.columns, index=X.index)
+        X_scaled = self.scaler.transform(X_encoded)
+        X_scaled_df = pd.DataFrame(X_scaled, columns=X_encoded.columns, index=X_encoded.index)
         
         X_selected = X_scaled_df[self.columns_out]
+        log_memory_usage("After preprocessor transform")
         
         return X_selected
     
@@ -214,6 +240,7 @@ class DataPreprocessor(BaseEstimator, TransformerMixin):
                 print(f"   {k.capitalize()}: {len(v)}")
     
     def _impute(self, X: pd.DataFrame) -> pd.DataFrame:
+        """Impute missing values, handling CategoricalDtype."""
         X_imp = X.copy()
         num_cols = self.feature_info['numeric']
         if num_cols:
@@ -221,45 +248,57 @@ class DataPreprocessor(BaseEstimator, TransformerMixin):
         
         cat_cols = self.feature_info['categorical_low_card'] + self.feature_info['categorical_high_card']
         for col in cat_cols:
-            X_imp[col] = X_imp[col].fillna('MISSING').astype(str)
+            if pd.api.types.is_categorical_dtype(X_imp[col]):
+                if 'MISSING' not in X_imp[col].cat.categories:
+                    try:
+                        X_imp[col] = X_imp[col].cat.add_categories(['MISSING'])
+                    except Exception as e:
+                        print(f"⚠️ Error adding 'MISSING' to categories for {col}: {e}")
+                X_imp[col] = X_imp[col].fillna('MISSING')
+            else:
+                X_imp[col] = X_imp[col].fillna('MISSING').astype(str)
             
         return X_imp
 
-class ImbalanceHandler(BaseEstimator, TransformerMixin):
-    """Handles class imbalance adaptively. Supports fit_resample for ImbPipeline."""
+class ImbalanceHandler(BaseSampler):
+    """Handles class imbalance adaptively. Custom sampler for imblearn compatibility."""
     
-    def __init__(self, random_state: int = 42, verbose: bool = True):
+    _sampling_type = 'bypass'  # For cases with no resampling
+    
+    def __init__(self, random_state: int = 42, verbose: bool = True, max_samples: int = 1000000):
+        super().__init__()
         self.random_state = random_state
         self.verbose = verbose
+        self.max_samples = max_samples  # Cap resampling size
         self.strategy = None
-        self.sampler = None
         
-    def fit(self, X, y=None):
-        if y is None:
-            return self
+    def _fit_resample(self, X, y):
         self.strategy, _ = self._analyze(y)
+        
         if self.strategy == 'conservative_smote':
-            self.sampler = SMOTE(sampling_strategy=0.1, k_neighbors=5, random_state=self.random_state)
+            # Limit synthetic samples
+            counts = Counter(y)
+            majority_count = max(counts.values())
+            target_counts = {k: min(v, int(0.1 * majority_count), self.max_samples // len(counts)) for k, v in counts.items()}
+            sampler = SMOTE(sampling_strategy=target_counts, k_neighbors=5, random_state=self.random_state)
         elif self.strategy == 'smote_enn':
-            self.sampler = SMOTEENN(sampling_strategy=0.3, random_state=self.random_state)
+            sampler = SMOTEENN(sampling_strategy=0.3, random_state=self.random_state)
         else:
-            self.sampler = None  # No resampling
-        if self.sampler:
-            self.sampler.fit_resample(X, y)  # Fit sampler
-        return self
-    
-    def fit_resample(self, X, y):
-        """For ImbPipeline compatibility."""
-        self.fit(X, y)
-        if self.sampler:
-            X_res, y_res = self.sampler.fit_resample(X, y)
             if self.verbose:
-                print(f"🔄 Balanced with {self.strategy}: {Counter(y_res)}")
-            return X_res, y_res
-        return X, y
-    
-    def transform(self, X):
-        return X  # No transform needed for test
+                print(f"⚖️ No resampling (strategy: {self.strategy})")
+            return X, y
+            
+        X_res, y_res = sampler.fit_resample(X, y)
+        
+        # Cap total samples
+        if len(X_res) > self.max_samples:
+            idx = np.random.choice(len(X_res), self.max_samples, replace=False)
+            X_res, y_res = X_res.iloc[idx], y_res.iloc[idx]
+        
+        if self.verbose:
+            print(f"🔄 Balanced with {self.strategy}: {Counter(y_res)}")
+            
+        return X_res, y_res
     
     def _analyze(self, y: pd.Series) -> tuple:
         counts = Counter(y)
@@ -291,14 +330,14 @@ class ModelEvaluator:
         self.best_score = 0
         
     def get_algorithms(self) -> Dict[str, tuple]:
-        """Algorithms with param grids (from literature). Added early stopping where possible."""
+        """Algorithms with param grids (from literature). Added early stopping."""
         algos = {
             'XGBoost': (
-                xgb.XGBClassifier(objective='multi:softprob', random_state=self.random_state, n_jobs=-1, enable_categorical=True, early_stopping_rounds=10),
+                xgb.XGBClassifier(objective='multi:softprob', random_state=self.random_state, n_jobs=1, enable_categorical=True, early_stopping_rounds=10),
                 {'n_estimators': [50, 100], 'max_depth': [3, 6], 'learning_rate': [0.01, 0.1]}
             ),
             'LightGBM': (
-                lgb.LGBMClassifier(objective='multiclass', random_state=self.random_state, n_jobs=-1),
+                lgb.LGBMClassifier(objective='multiclass', random_state=self.random_state, n_jobs=1),
                 {'n_estimators': [50, 100], 'max_depth': [3, 6], 'learning_rate': [0.01, 0.1], 'num_leaves': [15, 31]}
             ),
             'CatBoost': (
@@ -306,7 +345,7 @@ class ModelEvaluator:
                 {'iterations': [50, 100], 'depth': [3, 6], 'learning_rate': [0.01, 0.1]}
             ),
             'RandomForest': (
-                RandomForestClassifier(random_state=self.random_state, n_jobs=-1),
+                RandomForestClassifier(random_state=self.random_state, n_jobs=1),
                 {'n_estimators': [50, 100], 'max_depth': [5, 10]}
             ),
             'GradientBoosting': (
@@ -322,14 +361,15 @@ class ModelEvaluator:
                 {'C': [0.1, 1], 'kernel': ['rbf', 'linear']}
             ),
             'LogisticRegression': (
-                LogisticRegression(max_iter=500, random_state=self.random_state, n_jobs=-1),
+                LogisticRegression(max_iter=500, random_state=self.random_state, n_jobs=1),
                 {'C': [0.1, 1], 'solver': ['liblinear', 'lbfgs']}
             )
         }
         return algos
     
     def train_evaluate(self, X_train_raw: pd.DataFrame, y_train: pd.Series, X_test_raw: pd.DataFrame, y_test: pd.Series, engineer: FeatureEngineer, preprocessor: DataPreprocessor, imb_handler: ImbalanceHandler):
-        """Train and evaluate all algorithms using full pipeline."""
+        """Train and evaluate with threading backend."""
+        log_memory_usage("Before model training")
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=self.random_state)
         
         for name, (model, param_grid) in self.get_algorithms().items():
@@ -343,36 +383,40 @@ class ModelEvaluator:
                 ('model', model)
             ])
             
-            grid = GridSearchCV(full_pipe, {f'model__{k}': v for k, v in param_grid.items()}, 
-                                cv=cv, scoring='balanced_accuracy', n_jobs=-1, refit=True)
-            
-            grid.fit(X_train_raw, y_train)
-            
-            y_pred = grid.predict(X_test_raw)
-            
-            bal_acc = balanced_accuracy_score(y_test, y_pred)
-            macro_f1 = f1_score(y_test, y_pred, average='macro')
-            
-            self.results[name] = {
-                'best_params': grid.best_params_,
-                'balanced_acc': bal_acc,
-                'macro_f1': macro_f1,
-                'report': classification_report(y_test, y_pred, output_dict=True)
-            }
-            
-            if bal_acc > self.best_score:
-                self.best_score = bal_acc
-                self.best_model = grid.best_estimator_
+            with parallel_backend('threading', n_jobs=2):  # Limit to 2 threads
+                grid = GridSearchCV(full_pipe, {f'model__{k}': v for k, v in param_grid.items()}, 
+                                    cv=cv, scoring='balanced_accuracy', n_jobs=2, refit=True)
                 
-            if self.verbose:
-                print(f"✅ {name}: Bal Acc={bal_acc:.4f}, Macro F1={macro_f1:.4f}")
+                grid.fit(X_train_raw, y_train)
                 
+                y_pred = grid.predict(X_test_raw)
+                
+                bal_acc = balanced_accuracy_score(y_test, y_pred)
+                macro_f1 = f1_score(y_test, y_pred, average='macro')
+                
+                self.results[name] = {
+                    'best_params': grid.best_params_,
+                    'balanced_acc': bal_acc,
+                    'macro_f1': macro_f1,
+                    'report': classification_report(y_test, y_pred, output_dict=True)
+                }
+                
+                if bal_acc > self.best_score:
+                    self.best_score = bal_acc
+                    self.best_model = grid.best_estimator_
+                    
+                if self.verbose:
+                    print(f"✅ {name}: Bal Acc={bal_acc:.4f}, Macro F1={macro_f1:.4f}")
+                gc.collect()
+                log_memory_usage(f"After {name}")
+        
         # Recommend best
         best_algo = max(self.results, key=lambda k: self.results[k]['balanced_acc'])
         print(f"🏆 Best: {best_algo} with Bal Acc={self.results[best_algo]['balanced_acc']:.4f}")
         
     def generate_plots(self, X_test: pd.DataFrame, y_test: pd.Series, y_pred: np.ndarray, class_names: List[str]):
         """Generate plots using test data."""
+        log_memory_usage("Before plotting")
         # Confusion matrix
         cm = confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(10, 8))
@@ -407,16 +451,20 @@ class ModelEvaluator:
             plt.savefig(self.output_dir / 'feature_importance_model.png')
             plt.close()
         
-        # Permutation importance
-        perm_imp = permutation_importance(self.best_model, X_test, y_test, n_repeats=5, random_state=self.random_state, n_jobs=-1)
-        perm_df = pd.DataFrame({'importance': perm_imp.importances_mean}, index=X_test.columns)
+        # Permutation importance (on subset to save memory)
+        X_test_subset = X_test.sample(frac=0.1, random_state=self.random_state)
+        y_test_subset = y_test.loc[X_test_subset.index]
+        perm_imp = permutation_importance(self.best_model, X_test_subset, y_test_subset, n_repeats=5, random_state=self.random_state, n_jobs=1)
+        perm_df = pd.DataFrame({'importance': perm_imp.importances_mean}, index=X_test_subset.columns)
         perm_df.sort_values('importance', ascending=False)[:20].plot(kind='barh')
         plt.title('Top 20 Permutation Importances')
         plt.savefig(self.output_dir / 'feature_importance_perm.png')
         plt.close()
+        log_memory_usage("After plotting")
         
     def save_outputs(self, X_train_proc: pd.DataFrame, y_train: pd.Series, X_test_proc: pd.DataFrame, y_test: pd.Series, timestamp: str):
         """Save processed train/test separately."""
+        log_memory_usage("Before saving outputs")
         train_df = X_train_proc.copy()
         train_df['target'] = y_train.values
         train_df.to_parquet(self.output_dir / f'processed_train_{timestamp}.parquet')
@@ -430,31 +478,41 @@ class ModelEvaluator:
             
         with open(self.output_dir / 'best_model.pkl', 'wb') as f:
             pickle.dump(self.best_model, f)
+        log_memory_usage("After saving outputs")
 
 def main_pipeline(data_path: str, target_col: str = 'target'):
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     output_dir = f'./output/ml_pipeline_{timestamp}'
     
     # Load data
+    log_memory_usage("Before loading data")
     df = pd.read_parquet(data_path) if data_path.endswith('.parquet') else pd.read_csv(data_path)
+    # Downcast
+    for col in df.select_dtypes(include=['float64']).columns:
+        df[col] = df[col].astype('float32')
+    for col in df.select_dtypes(include=['int64']).columns:
+        df[col] = df[col].astype('int32')
     print(f"✅ Loaded: {df.shape}")
+    log_memory_usage("After loading data")
     
     # Split raw data
     X_raw = df.drop(columns=[target_col])
     y = df[target_col]
     X_train_raw, X_test_raw, y_train, y_test = train_test_split(X_raw, y, test_size=0.2, stratify=y, random_state=42)
     print(f"✂️ Split: Train {X_train_raw.shape}, Test {X_test_raw.shape}")
+    del df
+    gc.collect()
     
     # Initialize components
-    engineer = FeatureEngineer(datetime_cols=['created_at', 'updated_at'])  # Example cols
-    preprocessor = DataPreprocessor()
-    imb_handler = ImbalanceHandler()
+    engineer = FeatureEngineer(datetime_cols=['created_at', 'updated_at'])
+    preprocessor = DataPreprocessor(chunk_size=100000)
+    imb_handler = ImbalanceHandler(max_samples=1000000)
     
     # Evaluate models
     evaluator = ModelEvaluator(output_dir)
     evaluator.train_evaluate(X_train_raw, y_train, X_test_raw, y_test, engineer, preprocessor, imb_handler)
     
-    # Get processed data for saves/plots (using fitted pipeline)
+    # Get processed data for saves/plots
     X_train_proc = evaluator.best_model.named_steps['preprocess'].transform(
         evaluator.best_model.named_steps['engineer'].transform(X_train_raw)
     )
