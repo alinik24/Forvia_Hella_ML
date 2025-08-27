@@ -1,0 +1,53 @@
+{
+  "method": "stability_selection",
+  "timestamp": "2025-08-26T01:49:53.048052",
+  "features_analyzed": 14,
+  "features_removed": 0,
+  "execution_time": 1157.391295671463,
+  "method_details": {
+    "algorithm": "stability_selection",
+    "n_subsamples": 50,
+    "subsample_ratio": 0.8,
+    "mean_selection_prob": 1.1685714285714288,
+    "features_above_50pct": 9,
+    "features_above_80pct": 8,
+    "execution_time": 1157.391295671463,
+    "id_features_excluded": [
+      "erp_group_id",
+      "line_id",
+      "measure_fail_code",
+      "measure_step_number",
+      "object_id",
+      "panel_position_number",
+      "part_number",
+      "product_id",
+      "product_variant_id",
+      "recipe_revision_id",
+      "sequence_number",
+      "station_diag_id",
+      "station_diag_number",
+      "station_diag_number_was_missing",
+      "station_id",
+      "workorder_id",
+      "workplan_id",
+      "workstep_id",
+      "workstep_number_mes"
+    ]
+  },
+  "importance_scores": {
+    "workorder_desc": 0.1,
+    "part_desc": 1.98,
+    "part_group": 1.84,
+    "has_failures": 3.0,
+    "workstep_desc": 2.0,
+    "measure_value": 0.0,
+    "measurement_name": 0.0,
+    "measurement_unit": 0.0,
+    "measurement_type": 1.0,
+    "lower_limit": 0.54,
+    "upper_limit": 0.0,
+    "measurement_unit_was_missing": 2.0,
+    "lower_limit_was_missing": 1.96,
+    "upper_limit_was_missing": 1.94
+  }
+}

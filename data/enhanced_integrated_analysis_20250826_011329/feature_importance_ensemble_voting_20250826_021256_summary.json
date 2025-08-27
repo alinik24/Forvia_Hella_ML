@@ -1,0 +1,63 @@
+{
+  "method": "ensemble_voting",
+  "timestamp": "2025-08-26T02:12:56.148632",
+  "features_analyzed": 14,
+  "features_removed": 2,
+  "execution_time": 1170.3472707271576,
+  "method_details": {
+    "ensemble_methods": [
+      "permutation",
+      "mutual_info",
+      "chi_square",
+      "random_forest",
+      "stability"
+    ],
+    "method_weights": {
+      "permutation": 0.3,
+      "mutual_info": 0.25,
+      "chi_square": 0.2,
+      "random_forest": 0.15,
+      "stability": 0.1
+    },
+    "n_successful_methods": 5,
+    "consensus_features": 1,
+    "execution_time": 1170.3472707271576,
+    "id_features_excluded": [
+      "erp_group_id",
+      "line_id",
+      "measure_fail_code",
+      "measure_step_number",
+      "object_id",
+      "panel_position_number",
+      "part_number",
+      "product_id",
+      "product_variant_id",
+      "recipe_revision_id",
+      "sequence_number",
+      "station_diag_id",
+      "station_diag_number",
+      "station_diag_number_was_missing",
+      "station_id",
+      "workorder_id",
+      "workplan_id",
+      "workstep_id",
+      "workstep_number_mes"
+    ]
+  },
+  "importance_scores": {
+    "workorder_desc": 0.12674578359252903,
+    "part_desc": 0.17985917226790002,
+    "part_group": 0.15822672567967758,
+    "has_failures": 0.8834037249019274,
+    "workstep_desc": 0.33736822347652495,
+    "measure_value": 0.21730085362709506,
+    "measurement_name": 0.0076458117325115225,
+    "measurement_unit": 0.2521839766729638,
+    "measurement_type": 0.04681761161329779,
+    "lower_limit": 0.2279780024306744,
+    "upper_limit": 0.29244622259669917,
+    "measurement_unit_was_missing": 0.23716876277550986,
+    "lower_limit_was_missing": 0.15367195615980883,
+    "upper_limit_was_missing": 0.19366280908228112
+  }
+}

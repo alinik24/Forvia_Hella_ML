@@ -1,0 +1,52 @@
+{
+  "method": "mrmr_selection",
+  "timestamp": "2025-08-26T01:52:17.071619",
+  "features_analyzed": 14,
+  "features_removed": 0,
+  "execution_time": 17.13490605354309,
+  "method_details": {
+    "algorithm": "mrmr_greedy",
+    "n_selected_features": 14,
+    "mean_relevance": 0.026814781044875842,
+    "max_relevance": 0.08452389954891548,
+    "mean_redundancy": 0.4460909538547555,
+    "execution_time": 17.13490605354309,
+    "id_features_excluded": [
+      "erp_group_id",
+      "line_id",
+      "measure_fail_code",
+      "measure_step_number",
+      "object_id",
+      "panel_position_number",
+      "part_number",
+      "product_id",
+      "product_variant_id",
+      "recipe_revision_id",
+      "sequence_number",
+      "station_diag_id",
+      "station_diag_number",
+      "station_diag_number_was_missing",
+      "station_id",
+      "workorder_id",
+      "workplan_id",
+      "workstep_id",
+      "workstep_number_mes"
+    ]
+  },
+  "importance_scores": {
+    "workorder_desc": 0.024080001902355375,
+    "part_desc": 0.022624579949953483,
+    "part_group": 0.023127880227102215,
+    "has_failures": 0.08452389954891548,
+    "workstep_desc": 0.04260531989006011,
+    "measure_value": 0.04187784918868498,
+    "measurement_name": 0.006145639878061715,
+    "measurement_unit": 0.017399061708434083,
+    "measurement_type": 0.00674092203081611,
+    "lower_limit": 0.017796839806862863,
+    "upper_limit": 0.021490266878366193,
+    "measurement_unit_was_missing": 0.026478780844584215,
+    "lower_limit_was_missing": 0.020392301785877476,
+    "upper_limit_was_missing": 0.0201235909881875
+  }
+}

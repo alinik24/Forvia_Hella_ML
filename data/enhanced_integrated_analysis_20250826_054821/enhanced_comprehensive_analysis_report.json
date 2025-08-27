@@ -1,0 +1,83 @@
+{
+  "pipeline_info": {
+    "version": "enhanced_integrated_v3.0_fixed",
+    "timestamp": "2025-08-26T09:34:06.018183",
+    "target_column": "book_state",
+    "feature_importance_fixed": true
+  },
+  "analysis_history": [
+    {
+      "type": "feature_importance",
+      "method": "permutation_robust",
+      "timestamp": "20250826_055739",
+      "features_removed": 28,
+      "success": true
+    },
+    {
+      "type": "feature_importance",
+      "method": "gradient_boosting_importance",
+      "timestamp": "20250826_055831",
+      "features_removed": 11,
+      "success": true
+    }
+  ],
+  "essential_datasets": {
+    "02_quality_filtered": {
+      "shape": [
+        5108820,
+        30
+      ],
+      "processing_stage": "quality_filtering",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_054821/02_quality_filtered.parquet"
+    },
+    "03_encoded": {
+      "shape": [
+        5108820,
+        34
+      ],
+      "processing_stage": "encoding_complete",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_054821/03_encoded.parquet"
+    },
+    "feature_importance_permutation_robust_20250826_055739": {
+      "shape": [
+        5108820,
+        6
+      ],
+      "processing_stage": "feature_importance_complete",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_054821/feature_importance_permutation_robust_20250826_055739.parquet"
+    },
+    "feature_importance_gradient_boosting_importance_20250826_055831": {
+      "shape": [
+        5108820,
+        23
+      ],
+      "processing_stage": "feature_importance_complete",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_054821/feature_importance_gradient_boosting_importance_20250826_055831.parquet"
+    },
+    "correlation_enhanced_target_correlation_20250826_082304": {
+      "shape": [
+        150000,
+        34
+      ],
+      "processing_stage": "correlation_complete",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_054821/correlation_enhanced_target_correlation_20250826_082304.parquet"
+    },
+    "balanced_smote_20250826_093401": {
+      "shape": [
+        5108820,
+        34
+      ],
+      "processing_stage": "balancing_complete",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_054821/balanced_smote_20250826_093401.parquet"
+    }
+  },
+  "final_statistics": {
+    "total_analyses": 2,
+    "essential_datasets_generated": 6,
+    "final_shape": [
+      5108820,
+      34
+    ],
+    "successful_analyses": 2
+  }
+}

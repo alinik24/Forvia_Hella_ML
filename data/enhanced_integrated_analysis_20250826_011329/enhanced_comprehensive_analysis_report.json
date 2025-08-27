@@ -1,0 +1,341 @@
+{
+  "pipeline_info": {
+    "version": "enhanced_integrated_v2.0",
+    "timestamp": "2025-08-26T02:17:22.400811",
+    "target_column": "book_state",
+    "research_validated": true,
+    "optimization_applied": false,
+    "optimization_level": null,
+    "safety_guaranteed": false
+  },
+  "analysis_history": [
+    {
+      "type": "feature_importance",
+      "method": "permutation_importance_robust",
+      "timestamp": "20250826_012019",
+      "features_removed": 7
+    },
+    {
+      "type": "feature_importance",
+      "method": "boruta_selection",
+      "timestamp": "20250826_012117",
+      "features_removed": 0
+    },
+    {
+      "type": "feature_importance",
+      "method": "mutual_info_advanced",
+      "timestamp": "20250826_012157",
+      "features_removed": 0
+    },
+    {
+      "type": "feature_importance",
+      "method": "boruta_selection",
+      "timestamp": "20250826_012246",
+      "features_removed": 0
+    },
+    {
+      "type": "feature_importance",
+      "method": "stability_selection",
+      "timestamp": "20250826_014953",
+      "features_removed": 0
+    },
+    {
+      "type": "feature_importance",
+      "method": "chi_square_advanced",
+      "timestamp": "20250826_015113",
+      "features_removed": 2
+    },
+    {
+      "type": "feature_importance",
+      "method": "mrmr_selection",
+      "timestamp": "20250826_015217",
+      "features_removed": 0
+    },
+    {
+      "type": "feature_importance",
+      "method": "ensemble_voting",
+      "timestamp": "20250826_021256",
+      "features_removed": 2
+    }
+  ],
+  "datasets_created": {
+    "02_initial_filteraiton": {
+      "shape": [
+        5108820,
+        30
+      ],
+      "analysis_type": "Unknown",
+      "method": "Unknown",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/02_initial_filteraiton.parquet",
+      "optimization_applied": false
+    },
+    "03_intelligently_encoded": {
+      "shape": [
+        5108820,
+        34
+      ],
+      "analysis_type": "Unknown",
+      "method": "Unknown",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/03_intelligently_encoded.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_permutation_importance_robust_20250826_012019": {
+      "shape": [
+        30000,
+        27
+      ],
+      "analysis_type": "feature_importance",
+      "method": "permutation_importance_robust",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_permutation_importance_robust_20250826_012019.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_boruta_selection_20250826_012117": {
+      "shape": [
+        30000,
+        34
+      ],
+      "analysis_type": "feature_importance",
+      "method": "boruta_selection",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_boruta_selection_20250826_012117.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_mutual_info_advanced_20250826_012157": {
+      "shape": [
+        30000,
+        34
+      ],
+      "analysis_type": "feature_importance",
+      "method": "mutual_info_advanced",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_mutual_info_advanced_20250826_012157.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_boruta_selection_20250826_012246": {
+      "shape": [
+        30000,
+        34
+      ],
+      "analysis_type": "feature_importance",
+      "method": "boruta_selection",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_boruta_selection_20250826_012246.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_stability_selection_20250826_014953": {
+      "shape": [
+        30000,
+        34
+      ],
+      "analysis_type": "feature_importance",
+      "method": "stability_selection",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_stability_selection_20250826_014953.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_chi_square_advanced_20250826_015113": {
+      "shape": [
+        30000,
+        32
+      ],
+      "analysis_type": "feature_importance",
+      "method": "chi_square_advanced",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_chi_square_advanced_20250826_015113.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_mrmr_selection_20250826_015217": {
+      "shape": [
+        30000,
+        34
+      ],
+      "analysis_type": "feature_importance",
+      "method": "mrmr_selection",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_mrmr_selection_20250826_015217.parquet",
+      "optimization_applied": false
+    },
+    "feature_importance_ensemble_voting_20250826_021256": {
+      "shape": [
+        30000,
+        32
+      ],
+      "analysis_type": "feature_importance",
+      "method": "ensemble_voting",
+      "file_path": "/home/alinzk/Forvia_Project/data/enhanced_integrated_analysis_20250826_011329/feature_importance_ensemble_voting_20250826_021256.parquet",
+      "optimization_applied": false
+    }
+  },
+  "method_references": {
+    "feature_importance": {
+      "permutation_importance_robust": {
+        "name": "Permutation Importance (Robust)",
+        "description": "Model-agnostic importance with stability assessment and ID exclusion",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Model-dependent balanced scoring",
+        "default_cutoff": 0.001,
+        "computational_cost": "Medium",
+        "recommended_for": "Most reliable, excludes ID features automatically",
+        "research_basis": "Breiman (2001), Altmann et al. (2010)"
+      },
+      "boruta_selection": {
+        "name": "Boruta Feature Selection",
+        "description": "All-relevant feature selection with shadow features for significance testing",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Via Random Forest with class balancing",
+        "default_cutoff": 0.5,
+        "computational_cost": "High",
+        "recommended_for": "Comprehensive feature selection, handles interactions",
+        "research_basis": "Kursa & Rudnicki (2010), Nilsson et al. (2007)"
+      },
+      "mutual_info_advanced": {
+        "name": "Advanced Mutual Information",
+        "description": "MI with feature interaction detection and redundancy removal",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Stratified sampling with adaptive neighbors",
+        "default_cutoff": 0.01,
+        "computational_cost": "Medium",
+        "recommended_for": "Non-linear relationships, feature redundancy detection",
+        "research_basis": "Kraskov et al. (2004), Vergara & Est\u00e9vez (2014)"
+      },
+      "stability_selection": {
+        "name": "Stability Selection",
+        "description": "Robust feature selection via subsampling and selection frequency",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Stratified subsampling with regularization",
+        "default_cutoff": 0.6,
+        "computational_cost": "High",
+        "recommended_for": "Robust to sampling variation, low false discovery rate",
+        "research_basis": "Meinshausen & B\u00fchlmann (2010), Shah & Samworth (2013)"
+      },
+      "chi_square_advanced": {
+        "name": "Advanced Chi-Square Test",
+        "description": "Chi-square with Bonferroni correction and effect size measurement",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Robust to class imbalance by design",
+        "default_cutoff": 0.05,
+        "computational_cost": "Very Low",
+        "recommended_for": "Fast screening, statistical significance with multiple testing correction",
+        "research_basis": "Pearson (1900), Holm (1979), Cram\u00e9r (1946)"
+      },
+      "mrmr_selection": {
+        "name": "mRMR Feature Selection",
+        "description": "Minimum Redundancy Maximum Relevance with multiclass extension",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Information-theoretic, handles imbalance naturally",
+        "default_cutoff": 0.1,
+        "computational_cost": "Medium-High",
+        "recommended_for": "Feature redundancy removal, relevance optimization",
+        "research_basis": "Peng et al. (2005), Ding & Peng (2005)"
+      },
+      "ensemble_voting": {
+        "name": "Ensemble Feature Importance",
+        "description": "Consensus importance from multiple robust methods with voting",
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Combines multiple balanced approaches",
+        "default_cutoff": 0.5,
+        "computational_cost": "High",
+        "recommended_for": "Most robust results, combines best methods",
+        "research_basis": "Seijo-Pardo et al. (2017), Saeys et al. (2007)"
+      }
+    },
+    "correlation": {
+      "enhanced_target_correlation": {
+        "name": "Enhanced Target Correlation Analysis",
+        "description": "Comprehensive target-feature relationships with multiclass optimization",
+        "implemented": true,
+        "supports_categorical": true,
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Built-in sampling and weighting",
+        "default_cutoff": 0.05,
+        "computational_cost": "Medium",
+        "primary_use": "Target-based feature selection"
+      },
+      "robust_correlation_matrix": {
+        "name": "Robust Correlation Matrix (Spearman + Kendall)",
+        "description": "Kendall-tau emphasis for manufacturing data with ties and outliers",
+        "implemented": true,
+        "supports_categorical": false,
+        "multiclass_support": "Universal",
+        "imbalance_handling": "Outlier-robust methods",
+        "default_cutoff": 0.75,
+        "computational_cost": "Medium",
+        "primary_use": "Remove redundant features robust to manufacturing noise"
+      },
+      "mutual_info_manufacturing": {
+        "name": "Manufacturing-Optimized Mutual Information",
+        "description": "MI with fixed categorical handling and manufacturing preprocessing",
+        "implemented": true,
+        "supports_categorical": true,
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Stratified sampling + minority preservation",
+        "default_cutoff": 0.005,
+        "computational_cost": "High",
+        "primary_use": "Non-linear manufacturing process relationships"
+      },
+      "manufacturing_association": {
+        "name": "Manufacturing Statistical Association",
+        "description": "Enhanced p-value scoring with manufacturing-specific tests",
+        "implemented": true,
+        "supports_categorical": true,
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Robust statistical tests",
+        "default_cutoff": 2.0,
+        "computational_cost": "Low",
+        "primary_use": "Statistical significance in manufacturing QC data"
+      },
+      "information_gain_qc": {
+        "name": "Information Gain for Quality Control",
+        "description": "Decision-tree based information gain optimized for manufacturing QC",
+        "implemented": true,
+        "supports_categorical": true,
+        "multiclass_support": "Excellent",
+        "imbalance_handling": "Naturally handles imbalance",
+        "default_cutoff": 0.01,
+        "computational_cost": "Low",
+        "primary_use": "Manufacturing quality control feature selection"
+      }
+    },
+    "balancing": {
+      "smote": {
+        "name": "SMOTE (Synthetic Minority Oversampling)",
+        "description": "Generate synthetic samples using k-nearest neighbors",
+        "best_for": "Numerical features, minority class \u226550 samples",
+        "available": true,
+        "memory_efficient": true,
+        "suitable_for_extreme": false
+      },
+      "adaptive_oversample": {
+        "name": "Adaptive Random Oversampling",
+        "description": "Intelligent oversampling with progressive ratios",
+        "best_for": "Extreme imbalance (>1000:1), memory constraints",
+        "available": true,
+        "memory_efficient": true,
+        "suitable_for_extreme": true
+      },
+      "stratified_undersample": {
+        "name": "Stratified Undersampling",
+        "description": "Preserve class distribution while reducing majority",
+        "best_for": "Large datasets, maintain representativeness",
+        "available": true,
+        "memory_efficient": true,
+        "suitable_for_extreme": true
+      },
+      "class_weights": {
+        "name": "Balanced Class Weights",
+        "description": "Algorithm-level balancing without data modification",
+        "best_for": "Preserve all data, use with any classifier",
+        "available": true,
+        "memory_efficient": true,
+        "suitable_for_extreme": true
+      }
+    }
+  },
+  "final_statistics": {
+    "total_analyses": 8,
+    "datasets_generated": 10,
+    "final_shape": [
+      30000,
+      32
+    ],
+    "optimization_summary": {
+      "applied": false,
+      "level": null,
+      "safety_validated": false
+    }
+  }
+}

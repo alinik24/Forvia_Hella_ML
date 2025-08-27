@@ -1,0 +1,51 @@
+,dtype,category,storage_type,cardinality,total_count,null_count,null_percentage,example_value,encoding_recommendation,is_constant
+serial_number,category,categorical_identifiers_descriptions,category,6877,5108820,0,0.0,5e9cafafcdf811a0,HashingEncoder (high cardinality),False
+booking_id,category,categorical_identifiers_descriptions,category,72314,5108820,0,0.0,6405163ce94214a5,HashingEncoder (high cardinality),False
+book_state,int8,quality_indicators_boolean,integer,3,5108820,0,0.0,0,BinaryEncoder or keep as-is,False
+workstep_number_mes,int32,categorical_identifiers_descriptions,integer,7,5108820,0,0.0,2,TargetEncoder or HashingEncoder,False
+sequence_number,int8,quality_indicators_boolean,integer,4,5108820,0,0.0,1,BinaryEncoder or keep as-is,False
+created_at,"datetime64[ns, UTC]",datetime,datetime,44595,5108820,0,0.0,2025-04-23 00:15:22.200000+00:00,HashingEncoder (high cardinality),False
+updated_at,"datetime64[ns, UTC]",datetime,datetime,72300,5108820,0,0.0,2025-04-23 00:15:22.248000+00:00,HashingEncoder (high cardinality),False
+book_stamp,"datetime64[ns, UTC]",datetime,datetime,72300,5108820,0,0.0,2025-04-23 00:15:22.248000+00:00,HashingEncoder (high cardinality),False
+serial_number_id,string,categorical_identifiers_descriptions,string,16066,5108820,0,0.0,ac275801b9e8b716,HashingEncoder (high cardinality),False
+lot_id,category,categorical_identifiers_descriptions,category,1,5108820,0,0.0,f8b7cb98aa487468,DROP (constant),True
+lot_number,category,categorical_identifiers_descriptions,category,0,5108820,5108820,100.0,All null,DROP (constant),True
+station_id,category,categorical_identifiers_descriptions,category,11,5108820,0,0.0,38b291acfbf0c17e,TargetEncoder or HashingEncoder,False
+station_diag_id,category,categorical_identifiers_descriptions,category,4,5108820,0,0.0,04e5bdddafb0fed4,TargetEncoder or HashingEncoder,False
+workorder_id,category,categorical_identifiers_descriptions,category,19,5108820,0,0.0,b20effca14a46551,TargetEncoder or HashingEncoder,False
+panel_position_number,category,categorical_identifiers_descriptions,category,2,5108820,0,0.0,c81e728d9d4c2f63,TargetEncoder or HashingEncoder,False
+workorder_type,category,categorical_identifiers_descriptions,category,1,5108820,0,0.0,800618943025315f,DROP (constant),True
+station_number,category,categorical_identifiers_descriptions,category,11,5108820,0,0.0,685d6f29c663df5e,TargetEncoder or HashingEncoder,False
+station_desc,category,categorical_identifiers_descriptions,category,11,5108820,0,0.0,station d680659329f1a0e5,TargetEncoder or HashingEncoder,False
+station_diag_number,category,quality_indicators_boolean,category,3,5108820,5108462,99.9929925109908,f9e861d76229461e,BinaryEncoder or keep as-is,False
+station_diag_desc,category,categorical_identifiers_descriptions,category,3,5108820,5108462,99.9929925109908,station_diag 50d175b8196cb688,TargetEncoder or HashingEncoder,False
+workorder_number,category,categorical_identifiers_descriptions,category,19,5108820,0,0.0,16e36549597324d1,TargetEncoder or HashingEncoder,False
+workorder_desc,category,categorical_identifiers_descriptions,category,6,5108820,0,0.0,workorder ed42db1df9b61d01,TargetEncoder or HashingEncoder,False
+object_id,category,categorical_identifiers_descriptions,category,6,5108820,0,0.0,5c1d46132cc79287,TargetEncoder or HashingEncoder,False
+product_variant_id,category,categorical_identifiers_descriptions,category,6,5108820,0,0.0,9acf7cc65828fe16,TargetEncoder or HashingEncoder,False
+workplan_id,category,categorical_identifiers_descriptions,category,6,5108820,0,0.0,99076f817e665df9,TargetEncoder or HashingEncoder,False
+part_number,category,categorical_identifiers_descriptions,category,6,5108820,0,0.0,5a6867de4757c26d,TargetEncoder or HashingEncoder,False
+part_desc,category,categorical_identifiers_descriptions,category,5,5108820,0,0.0,part 880411f146685a11,TargetEncoder or HashingEncoder,False
+part_group,category,categorical_identifiers_descriptions,category,6,5108820,0,0.0,8db45195e82aa5e9,TargetEncoder or HashingEncoder,False
+has_failures,int8,quality_indicators_boolean,integer,2,5108820,0,0.0,0,BinaryEncoder or keep as-is,False
+erp_group_id,category,categorical_identifiers_descriptions,category,8,5108820,0,0.0,36a6dcf293f22691,TargetEncoder or HashingEncoder,False
+workstep_number_alt,category,categorical_identifiers_descriptions,category,1,5108820,0,0.0,c4ca4238a0b92382,DROP (constant),True
+workstep_number_erp,int32,categorical_identifiers_descriptions,integer,7,5108820,0,0.0,30,TargetEncoder or HashingEncoder,False
+workstep_desc,category,categorical_identifiers_descriptions,category,8,5108820,0,0.0,workstep c5c6cc111918aa1c,TargetEncoder or HashingEncoder,False
+workstep_id,category,categorical_identifiers_descriptions,category,28,5108820,0,0.0,05c4cecc071a5523,TargetEncoder or HashingEncoder,False
+erp_group_desc,category,categorical_identifiers_descriptions,category,8,5108820,0,0.0,DCDC AMS3.1 Trennlinie ICT-Tester 1,TargetEncoder or HashingEncoder,False
+line_id,category,categorical_identifiers_descriptions,category,2,5108820,0,0.0,ad63c9586da23a33,TargetEncoder or HashingEncoder,False
+line_desc,category,categorical_identifiers_descriptions,category,2,5108820,0,0.0,line b9cad5d0a226a614,TargetEncoder or HashingEncoder,False
+plant_desc,category,categorical_identifiers_descriptions,category,1,5108820,0,0.0,plant 1f9141b53fb092b5,DROP (constant),True
+recipe_revision_id,category,categorical_identifiers_descriptions,category,15,5108820,51731,1.0125821618299333,55d491944ddc8792,TargetEncoder or HashingEncoder,False
+measure_step_number,float32,numeric,float,972,5108820,51731,1.0125821618299333,426.0,StandardScaler or RobustScaler,False
+measure_value,float64,numeric,float,808484,5108820,216829,4.244209034571584,69.2531,HashingEncoder (high cardinality),False
+measure_fail_code,Int8,quality_indicators_boolean,unknown,2,5108820,51731,1.0125821618299333,0,BinaryEncoder or keep as-is,False
+catalog_id,category,categorical_identifiers_descriptions,category,1088,5108820,51731,1.0125821618299333,71b179406c4af19d,HashingEncoder (high cardinality),False
+product_id,category,categorical_identifiers_descriptions,category,3,5108820,51731,1.0125821618299333,5c1d46132cc79287,TargetEncoder or HashingEncoder,False
+teststep_id,category,categorical_identifiers_descriptions,category,1088,5108820,51731,1.0125821618299333,d08f1b60bd2d91d4,HashingEncoder (high cardinality),False
+measurement_name,category,categorical_identifiers_descriptions,category,1088,5108820,51731,1.0125821618299333,fc5c2b632a193f27,HashingEncoder (high cardinality),False
+measurement_unit,category,categorical_identifiers_descriptions,category,25,5108820,302732,5.925673638922491,pF,TargetEncoder or HashingEncoder,False
+measurement_type,category,categorical_identifiers_descriptions,category,3,5108820,51731,1.0125821618299333,N,TargetEncoder or HashingEncoder,False
+lower_limit,category,numeric,category,166,5108820,475532,9.308059395320251,0,StandardScaler or RobustScaler,False
+upper_limit,category,numeric,category,165,5108820,475532,9.308059395320251,700,StandardScaler or RobustScaler,False

@@ -1,0 +1,30 @@
+{
+  "pipeline_version": "2.0",
+  "timestamp": "2025-08-24T00:40:28.342096",
+  "original_shape": [
+    5108820,
+    50
+  ],
+  "final_shape": [
+    5108820,
+    60
+  ],
+  "target_column": "book_state",
+  "dropped_features": [
+    "lot_number",
+    "lot_id",
+    "plant_desc",
+    "workorder_type",
+    "workstep_number_alt"
+  ],
+  "saved_datasets": [
+    "01_initial_loaded",
+    "02_after_feature_dropping",
+    "03_encoded",
+    "04_binary_target",
+    "corr_target_03_encoded_235843",
+    "corr_pearson_03_encoded_000510",
+    "balanced_corr_pearson_03_encoded_000510_004007"
+  ],
+  "processing_steps": 4
+}
