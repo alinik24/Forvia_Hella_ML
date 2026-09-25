@@ -1,126 +1,29 @@
-# Forvia_Project
+# Forvia Hella ML
 
-# Guide: Installing Dependencies with `requirements.txt`
+## What this project is
 
-This guide will walk you through the process of setting up a Python environment and installing dependencies listed in a
-`requirements.txt` file using two different methods: Python's built-in `venv` module and `uv`.
+Machine-learning preprocessing, exploratory analysis, feature selection, and prediction-model work for the Forvia/Hella data project. This repository is the owned canonical project copy and is self-contained; no external repository is required at runtime.
 
-## Prerequisites
+## Quick start
 
-- Python installed on your system. (Ideally 3.10)
-- Java SDK is installed on your system. (Ideally latest stable version)
-- `pip` installed and updated.
-- `uv` installed if you plan to use it.
-
-## Method 1: Using Python's `venv`
-
-### Step 1: Create a Virtual Environment
-
-Open your terminal or command prompt and navigate to your project directory. Run the following command to create a
-virtual environment:
-
-```bash
-python -m venv myenv
+```powershell
+git clone https://github.com/alinik24/Forvia_Hella_ML.git
+cd Forvia_Hella_ML
+.\bootstrap.ps1
+.\.venv\Scripts\python.exe scripts\doctor.py
 ```
 
-Here, myenv is the name of your virtual environment. You can replace it with any name you prefer.
+POSIX: `./bootstrap.sh`.
 
-### Step 2: Activate the Virtual Environment
+## Configuration and data
 
-- On Windows:
+Raw and large parquet datasets remain external. Configure portable paths through `src/data_preprocessing/config/paths.yaml` or a machine-local copy under `%USERPROFILE%\.config\Forvia_Hella_ML\`; do not commit private data paths.
 
-```bash
-myenv\Scripts\activate
-```
+## Development
 
-- On macOS and Linux:
+- Bootstrap: `./bootstrap.ps1` or `./bootstrap.sh`
+- Doctor: `.venv\Scripts\python scripts\doctor.py`
+- Tests: inspect notebook/pipeline entry points; no dedicated test suite was present in the inspected tree.
+- Main pipeline surfaces: `src/data_preprocessing/`, `src/prediction_models/`, `src/data_exploration/`.
 
-```bash
-source myenv/bin/activate
-```
-
-### Step 3: Install Dependencies
-
-With the virtual environment activated, you can now install the dependencies listed in your requirements.txt file. Run
-the following command:
-
-```bash
-pip install -r requirements.txt
-```
-
-This command will read the requirements.txt file and install all the specified packages and their dependencies.
-
-## Method 2: Using uv
-
-### Step 1: Install uv
-
-If you haven't already installed uv, you can do so by following the instructions on the official uv GitHub repository.
-
-### Step 2: Create a Virtual Environment
-
-Navigate to your project directory and run the following command to create a virtual environment using uv:
-
-```bash
-uv venv myenv
-```
-
-### Step 3: Activate the Virtual Environment
-
-- On Windows:
-
-```bash
-myenv\Scripts\activate
-```
-
-- On macOS and Linux:
-
-```bash
-source myenv/bin/activate
-```
-
-### Step 4: Install Dependencies
-
-With the virtual environment activated, you can install the dependencies listed in your requirements.txt file using uv.
-Run the following command:
-
-```bash
-uv pip install -r requirements.txt
-```
-
-This command will read the requirements.txt file and install all the specified packages and their dependencies.
-
-Both methods allow you to create isolated Python environments and install dependencies efficiently. Using venv is a
-built-in solution that comes with Python, while uv offers additional features and potentially faster performance. Choose
-the method that best fits your needs and workflow.
-
-___
-
-### Manual
-
-Execution Order:
-
-1. Filter Bookstates (Optional)
-2. Filter Time (Optional, if size of the dataset needs to be reduced)
-3. Balancing
-4. Encoding
-5. Clean Correlations
-6. Choose one of the feature importance models (GBM, Lasso, Ridge, Logistic Regression)
-7. Filter columns accordingly (Optional, if size of the dataset needs to be reduced)
-8. Use the prediction model for predictive quality
-
-The single dataset models are were just meant as poc and insights. The insights of the lasso feature importance were
-used to shorten the datasets before merging, but are optional if you have enough processing power. For testing the
-models and preparation pipeline use the bookmeas dataset version of the pipeline. The merging of bookmeas and materials
-for
-testing is also possible, but too ressource intensive, so not recommended.
-
-Data analysis can be ran for any of the single line datasets (materials, bookings, measurements) or the second version
-of the materials dataset (materials_4_weeks), which caused problems in the first few iterations, to gain crucial
-knowledge.
-
-Column Exploration can be used on all datasets to check the amount, names and datatypes of all the columns of the chosen
-dataset.
-
-The Random Forest predictive model can be used but was regarded as a poc and a first iteration of a prediction model.
-The XGBoost model (Final Version xgb_recall_xai) was the main model used in this project. Beforehand a final EDA can be run on the dataset before
-running the prediction model. 
+See `docs/ARCHITECTURE.md` and `docs/DEVELOPMENT.md`.
